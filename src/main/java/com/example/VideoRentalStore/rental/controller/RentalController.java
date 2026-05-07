@@ -41,4 +41,28 @@ public class RentalController {
                 .build();
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/rentals/history/{userId}")
+    public ResponseEntity<ApiResponse<UserRentalListDTO>> getUserProcessedRentals(
+            @PathVariable Long userId) {
+
+        ApiResponse<UserRentalListDTO> response = ApiResponse.<UserRentalListDTO>builder()
+                .status(Status.OK)
+                .message("Rentals fetched Successfully")
+                .data(rentalService.getUserProcessedRentals(userId))
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/rentals/pending/{userId}")
+    public ResponseEntity<ApiResponse<UserRentalListDTO>> getUserPendingRentals(
+            @PathVariable Long userId) {
+
+        ApiResponse<UserRentalListDTO> response = ApiResponse.<UserRentalListDTO>builder()
+                .status(Status.OK)
+                .message("Rentals fetched Successfully")
+                .data(rentalService.getUserPendingRentals(userId))
+                .build();
+        return ResponseEntity.ok(response);
+    }
 }

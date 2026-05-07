@@ -6,6 +6,7 @@ import com.example.VideoRentalStore.rental.dtos.UserRentalListDTO;
 import com.example.VideoRentalStore.rental.model.Rental;
 import com.example.VideoRentalStore.rental.model.RentalStatus;
 import com.example.VideoRentalStore.rental.repo.RentalRepo;
+import com.example.VideoRentalStore.user.dtos.UserDTOForResponse;
 import com.example.VideoRentalStore.user.model.User;
 import com.example.VideoRentalStore.user.repo.UserRepo;
 import lombok.RequiredArgsConstructor;
@@ -85,7 +86,39 @@ public class RentalService {
                 .orElseThrow(()->new ResourceNotFoundException("User not found!"));
 
         List<Rental> rentals = user.getRentals();
+        if(rentals.isEmpty())
+            return UserRentalListDTO.builder()
+                    .rentals(Collections.emptyList())
+                    .user(UserDTOForResponse.toDTO(user))
+                    .build();
         return UserRentalListDTO.toDTO(user,rentals);
 
+    }
+
+    public UserRentalListDTO getUserProcessedRentals(Long userId) {
+        User user = userRepo.findById(userId)
+                .orElseThrow(()->new ResourceNotFoundException("User not found!"));
+
+        List <Rental> rentals = userRepo.findByUserIdAndRentalStatus(userId, RentalStatus.LOSS, RentalStatus.RETURNED);
+        if(rentals.isEmpty())
+            return UserRentalListDTO.builder()
+                    .rentals(Collections.emptyList())
+                    .user(UserDTOForResponse.toDTO(user))
+                    .build();
+        return UserRentalListDTO.toDTO(user, rentals);
+    }
+
+    public UserRentalListDTO getUserPendingRentals(Long userId) {
+
+        User user = userRepo.findById(userId)
+                .orElseThrow(()->new ResourceNotFoundException("User not found!"));
+
+        List <Rental> rentals = userRepo.findByUserIdAndStatus(userId, RentalStatus.PENDING);
+        if(rentals.isEmpty())
+            return UserRentalListDTO.builder()
+                    .rentals(Collections.emptyList())
+                    .user(UserDTOForResponse.toDTO(user))
+                    .build();
+        return UserRentalListDTO.toDTO(user, rentals);
     }
 }
