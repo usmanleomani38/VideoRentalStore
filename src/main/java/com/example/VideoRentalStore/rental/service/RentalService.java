@@ -80,45 +80,29 @@ public class RentalService {
 
     }
 
-    public UserRentalListDTO getUserRentals(Long userId) {
+    public UserRentalListDTO getUserRentals(Long userId, RentalStatus status) {
 
         User user = userRepo.findById(userId)
                 .orElseThrow(()->new ResourceNotFoundException("User not found!"));
 
-        List<Rental> rentals = user.getRentals();
-        if(rentals.isEmpty())
-            return UserRentalListDTO.builder()
-                    .rentals(Collections.emptyList())
-                    .user(UserDTOForResponse.toDTO(user))
-                    .build();
-        return UserRentalListDTO.toDTO(user,rentals);
+        if(status == null) {
+            List<Rental> rentals = user.getRentals();
+            if (rentals.isEmpty())
+                return UserRentalListDTO.builder()
+                        .rentals(Collections.emptyList())
+                        .user(UserDTOForResponse.toDTO(user))
+                        .build();
+            return UserRentalListDTO.toDTO(user, rentals);
+        }
+        else
+            return UserRentalListDTO.toDTO(user, userRepo.findByUserIdAndStatus(userId, status));
+//        if(status.equals(RentalStatus.RETURNED))
+//            return UserRentalListDTO.toDTO(user, userRepo.findByUserIdAndStatus(userId, status));
+//        else if (status.equals(RentalStatus.LOSS))
+//            return UserRentalListDTO.toDTO(user, userRepo.findByUserIdAndStatus(userId, status));
+//        else
+//            return UserRentalListDTO.toDTO(user, userRepo.findByUserIdAndStatus(userId, status));
 
     }
 
-    public UserRentalListDTO getUserProcessedRentals(Long userId) {
-        User user = userRepo.findById(userId)
-                .orElseThrow(()->new ResourceNotFoundException("User not found!"));
-
-        List <Rental> rentals = userRepo.findByUserIdAndRentalStatus(userId, RentalStatus.LOSS, RentalStatus.RETURNED);
-        if(rentals.isEmpty())
-            return UserRentalListDTO.builder()
-                    .rentals(Collections.emptyList())
-                    .user(UserDTOForResponse.toDTO(user))
-                    .build();
-        return UserRentalListDTO.toDTO(user, rentals);
-    }
-
-    public UserRentalListDTO getUserPendingRentals(Long userId) {
-
-        User user = userRepo.findById(userId)
-                .orElseThrow(()->new ResourceNotFoundException("User not found!"));
-
-        List <Rental> rentals = userRepo.findByUserIdAndStatus(userId, RentalStatus.PENDING);
-        if(rentals.isEmpty())
-            return UserRentalListDTO.builder()
-                    .rentals(Collections.emptyList())
-                    .user(UserDTOForResponse.toDTO(user))
-                    .build();
-        return UserRentalListDTO.toDTO(user, rentals);
-    }
 }

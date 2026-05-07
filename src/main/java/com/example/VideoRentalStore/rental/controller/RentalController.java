@@ -32,37 +32,15 @@ public class RentalController {
 
     @GetMapping("/rentals/user/{userId}")
     public ResponseEntity<ApiResponse<UserRentalListDTO>> getAllUserRentals(
-            @PathVariable Long userId) {
+            @PathVariable Long userId,
+            @RequestParam(required = false) RentalStatus status) {
 
         ApiResponse<UserRentalListDTO> response = ApiResponse.<UserRentalListDTO>builder()
                 .status(Status.OK)
                 .message("Rental fetched Successfully")
-                .data(rentalService.getUserRentals(userId))
+                .data(rentalService.getUserRentals(userId, status))
                 .build();
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/rentals/history/{userId}")
-    public ResponseEntity<ApiResponse<UserRentalListDTO>> getUserProcessedRentals(
-            @PathVariable Long userId) {
-
-        ApiResponse<UserRentalListDTO> response = ApiResponse.<UserRentalListDTO>builder()
-                .status(Status.OK)
-                .message("Rentals fetched Successfully")
-                .data(rentalService.getUserProcessedRentals(userId))
-                .build();
-        return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/rentals/pending/{userId}")
-    public ResponseEntity<ApiResponse<UserRentalListDTO>> getUserPendingRentals(
-            @PathVariable Long userId) {
-
-        ApiResponse<UserRentalListDTO> response = ApiResponse.<UserRentalListDTO>builder()
-                .status(Status.OK)
-                .message("Rentals fetched Successfully")
-                .data(rentalService.getUserPendingRentals(userId))
-                .build();
-        return ResponseEntity.ok(response);
-    }
 }
