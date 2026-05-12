@@ -6,6 +6,7 @@ import com.example.VideoRentalStore.user.dtos.UsersDTO;
 import com.example.VideoRentalStore.user.model.User;
 import com.example.VideoRentalStore.user.repo.UserRepo;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -26,6 +27,8 @@ public class UserService {
             newUser.setEmail(userDTO.getEmail());
             return UserDTO.toDTO(userRepo.save(newUser));
     }
+
+
     public UserDTO getUserByPhoneNo(Long phoneNo) {
          User user = userRepo.findByContactNo(phoneNo)
                  .orElseThrow(()-> new ResourceNotFoundException("User not found!"));
@@ -64,7 +67,11 @@ public class UserService {
             return UsersDTO.toDTO(new ArrayList<>(users));
     }
 
+
     public UserDTO getUserByName(String userName) {
+
+        if (!userName.matches("^[a-zA-Z ]*$"))
+            throw new IllegalArgumentException("User Name contains only alphabets");
 
         User user = userRepo.findByUserNameContainingIgnoreCase(userName)
                 .orElseThrow(()-> new ResourceNotFoundException("User not found!"));

@@ -7,6 +7,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.WordUtils;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -55,6 +59,18 @@ public class GlobalExceptionHandler {
                 ex.getMessage()
         );
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ApiResponse<Void>> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+
+        String name = ex.getName();
+        String formattedString = Character.toUpperCase(name.charAt(0)) + name.substring(1).replaceAll("(?<!^)([A-Z])", " $1");
+        ApiResponse<Void> response = new ApiResponse<>(
+                Status.BAD_REQUEST,
+        "Invalid input for " + formattedString
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
 }

@@ -8,6 +8,7 @@ import com.example.VideoRentalStore.user.dtos.UsersDTO;
 import com.example.VideoRentalStore.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,9 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api")
 public class UserController {
 
-
     private final UserService userService;
-
 
     @PostMapping("/register-user")
     public ResponseEntity<ApiResponse<UserDTO>> registerUser(@Valid @RequestBody UserDTO registerUserDto) {
@@ -52,7 +51,7 @@ public class UserController {
 
     @PutMapping("/update-user/{userId}")
     public ResponseEntity<ApiResponse<UserDTO>> updateUserById(@PathVariable Long userId,
-                                                               @RequestBody UserDTO userDTO) {
+                                                               @Valid @RequestBody UserDTO userDTO) {
         ApiResponse<UserDTO> response = ApiResponse.<UserDTO>builder()
                 .status(Status.OK)
                 .message("User updated successfully")
@@ -72,9 +71,10 @@ public class UserController {
             return ResponseEntity.ok(response);
     }
 
+
         @GetMapping("/get-user-by-name")
         public ResponseEntity<ApiResponse<UserDTO>>getUserByName(@RequestParam String userName) {
-
+            float f = Float.parseFloat("3.124");
             ApiResponse<UserDTO> response = ApiResponse.<UserDTO>builder()
                     .status(Status.OK)
                     .message("User fetched Successfully")

@@ -21,9 +21,12 @@ public class User extends AuditFields {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
     private String userName;
+    @Column(unique = true)
     private Long contactNo;
-    private String address;
+    @Column(unique = true)
     private String email;
+    private String address;
+
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Rental> rentals = new ArrayList<>();
