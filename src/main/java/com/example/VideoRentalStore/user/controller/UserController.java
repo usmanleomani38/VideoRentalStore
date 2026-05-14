@@ -1,6 +1,7 @@
 package com.example.VideoRentalStore.user.controller;
 
 
+import com.example.VideoRentalStore.appconstant.AppConstants;
 import com.example.VideoRentalStore.exceptionhandler.ApiResponse;
 import com.example.VideoRentalStore.exceptionhandler.Status;
 import com.example.VideoRentalStore.user.dtos.UserDTO;
@@ -61,12 +62,19 @@ public class UserController {
     }
 
     @GetMapping("/get-all-user")
-    public ResponseEntity<ApiResponse<UsersDTO>>getAllUsers() {
+    public ResponseEntity<ApiResponse<UsersDTO>>getAllUsers(
+            @RequestParam(name = "sortBy",
+                    defaultValue = AppConstants.SORT_USERS_BY,
+                    required = false) String sortBy,
+            @RequestParam(name = "sortOrder",
+                    defaultValue = AppConstants.SORT_DIR,
+                    required = false) String sortOrder
+    ) {
 
             ApiResponse<UsersDTO> response = ApiResponse.<UsersDTO>builder()
                     .status(Status.OK)
                     .message("Users fetched Successfully")
-                    .data(userService.getAllUsers())
+                    .data(userService.getAllUsers(sortBy, sortOrder))
                     .build();
             return ResponseEntity.ok(response);
     }

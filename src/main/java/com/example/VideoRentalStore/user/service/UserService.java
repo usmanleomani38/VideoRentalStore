@@ -6,7 +6,7 @@ import com.example.VideoRentalStore.user.dtos.UsersDTO;
 import com.example.VideoRentalStore.user.model.User;
 import com.example.VideoRentalStore.user.repo.UserRepo;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -56,9 +56,13 @@ public class UserService {
         return UserDTO.toDTO(userRepo.save(user));
     }
 
-    public UsersDTO getAllUsers() {
+    public UsersDTO getAllUsers(String sortBy, String sortOrder) {
 
-        List<User> users = userRepo.findAll();
+        Sort sortByAndOrder = sortOrder.equalsIgnoreCase("asc")
+                ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+
+        List<User> users = userRepo.findAll(sortByAndOrder);
         if (users.isEmpty())
             return  UsersDTO.builder()
                     .users(Collections.emptyList())
