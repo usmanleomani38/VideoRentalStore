@@ -1,5 +1,6 @@
 package com.example.VideoRentalStore.rental.controller;
 
+import com.example.VideoRentalStore.apputils.AppConstants;
 import com.example.VideoRentalStore.exceptionhandler.ApiResponse;
 import com.example.VideoRentalStore.exceptionhandler.Status;
 import com.example.VideoRentalStore.rental.dtos.RentalListDTO;
@@ -19,13 +20,19 @@ public class RentalController {
 
     @GetMapping("/get-rentals")
     public ResponseEntity<ApiResponse<RentalListDTO>> getAllRentals(
-            @RequestParam(required = false)
-            RentalStatus status) {
+            @RequestParam(required = false) RentalStatus status,
+            @RequestParam(name = "sortBy",
+                    defaultValue = AppConstants.SORT_RENTALS_BY,
+                    required = false) String sortBy,
+            @RequestParam(name = "sortOrder",
+                    defaultValue = AppConstants.SORT_DIR,
+                    required = false) String sortOrder
+    ) {
 
         ApiResponse<RentalListDTO> response = ApiResponse.<RentalListDTO>builder()
                 .status(Status.OK)
                 .message("Rentals fetched Successfully")
-                .data(rentalService.getAllRentals(status))
+                .data(rentalService.getAllRentals(status, sortBy, sortOrder))
                 .build();
         return ResponseEntity.ok(response);
     }

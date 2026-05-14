@@ -1,5 +1,6 @@
 package com.example.VideoRentalStore.genere.service;
 
+import com.example.VideoRentalStore.apputils.CommonUtils;
 import com.example.VideoRentalStore.exceptionhandler.customexceptions.ResourceNotFoundException;
 import com.example.VideoRentalStore.genere.dtos.GenreDTO;
 import com.example.VideoRentalStore.genere.dtos.GenresDTO;
@@ -61,9 +62,9 @@ public class GenreService {
 
     }
 
-    public GenresDTO getAllGenres() {
+    public GenresDTO getAllGenres(String sortBy, String sortOrder) {
 
-        List<Genre> genres = genreRepo.findAll();
+        List<Genre> genres = genreRepo.findAll(CommonUtils.buildSort(sortBy, sortOrder));
         if (genres.isEmpty())
             return GenresDTO.builder()
                     .genres(Collections.emptyList())

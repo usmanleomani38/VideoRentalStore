@@ -1,19 +1,17 @@
 package com.example.VideoRentalStore.coupon.service;
 
+import com.example.VideoRentalStore.apputils.CommonUtils;
 import com.example.VideoRentalStore.coupon.dtos.CouponDTO;
 import com.example.VideoRentalStore.coupon.dtos.CouponsDTO;
 import com.example.VideoRentalStore.coupon.model.Coupon;
 import com.example.VideoRentalStore.coupon.repo.CouponRepo;
 import com.example.VideoRentalStore.exceptionhandler.customexceptions.ResourceNotFoundException;
-import com.example.VideoRentalStore.user.dtos.UsersDTO;
-import com.example.VideoRentalStore.user.model.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -59,9 +57,9 @@ public class CouponService {
 
     }
 
-    public CouponsDTO getAllCoupons(Boolean isActive) {
+    public CouponsDTO getAllCoupons(Boolean isActive, String sortBy, String sortOrder ) {
 
-        List<Coupon> coupons = couponRepo.findAll();
+        List<Coupon> coupons = couponRepo.findAll(CommonUtils.buildSort(sortBy, sortOrder));
         List<Coupon> activeCoupons = new ArrayList<>();
         List<Coupon> deActiveCoupons = new ArrayList<>();
         if (coupons.isEmpty())

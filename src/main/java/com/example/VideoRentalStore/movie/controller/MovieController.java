@@ -1,5 +1,6 @@
 package com.example.VideoRentalStore.movie.controller;
 
+import com.example.VideoRentalStore.apputils.AppConstants;
 import com.example.VideoRentalStore.exceptionhandler.ApiResponse;
 import com.example.VideoRentalStore.exceptionhandler.Status;
 import com.example.VideoRentalStore.movie.dtos.*;
@@ -60,12 +61,19 @@ public class MovieController {
     }
 
     @GetMapping("/get-all-movies")
-    public ResponseEntity<ApiResponse<MoviesDTO>>getAllMovies() {
+    public ResponseEntity<ApiResponse<MoviesDTO>>getAllMovies(
+            @RequestParam(name = "sortBy",
+                    defaultValue = AppConstants.SORT_MOVIES_BY,
+                    required = false) String sortBy,
+            @RequestParam(name = "sortOrder",
+                    defaultValue = AppConstants.SORT_DIR,
+                    required = false) String sortOrder
+    ) {
 
         ApiResponse<MoviesDTO> response = ApiResponse.<MoviesDTO>builder()
                 .status(Status.OK)
                 .message("Movies fetched Successfully")
-                .data(movieService.getAllMovies())
+                .data(movieService.getAllMovies(sortBy, sortOrder))
                 .build();
         return ResponseEntity.ok(response);
     }

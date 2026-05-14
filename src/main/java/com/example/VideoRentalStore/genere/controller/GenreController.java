@@ -1,5 +1,6 @@
 package com.example.VideoRentalStore.genere.controller;
 
+import com.example.VideoRentalStore.apputils.AppConstants;
 import com.example.VideoRentalStore.exceptionhandler.ApiResponse;
 import com.example.VideoRentalStore.exceptionhandler.Status;
 import com.example.VideoRentalStore.genere.dtos.GenreDTO;
@@ -62,12 +63,19 @@ public class GenreController {
     }
 
     @GetMapping("/get-all-genre")
-    public ResponseEntity<ApiResponse<GenresDTO>>getAllGenres() {
+    public ResponseEntity<ApiResponse<GenresDTO>>getAllGenres(
+            @RequestParam(name = "sortBy",
+                    defaultValue = AppConstants.SORT_GENRES_BY,
+                    required = false) String sortBy,
+            @RequestParam(name = "sortOrder",
+                    defaultValue = AppConstants.SORT_DIR,
+                    required = false) String sortOrder
+    ) {
 
         ApiResponse<GenresDTO> response = ApiResponse.<GenresDTO>builder()
                 .status(Status.OK)
                 .message("Genres fetched Successfully")
-                .data(genreService.getAllGenres())
+                .data(genreService.getAllGenres(sortBy, sortOrder))
                 .build();
         return ResponseEntity.ok(response);
     }

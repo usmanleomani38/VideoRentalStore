@@ -1,12 +1,12 @@
 package com.example.VideoRentalStore.user.service;
 
+import com.example.VideoRentalStore.apputils.CommonUtils;
 import com.example.VideoRentalStore.exceptionhandler.customexceptions.ResourceNotFoundException;
 import com.example.VideoRentalStore.user.dtos.UserDTO;
 import com.example.VideoRentalStore.user.dtos.UsersDTO;
 import com.example.VideoRentalStore.user.model.User;
 import com.example.VideoRentalStore.user.repo.UserRepo;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -58,11 +58,7 @@ public class UserService {
 
     public UsersDTO getAllUsers(String sortBy, String sortOrder) {
 
-        Sort sortByAndOrder = sortOrder.equalsIgnoreCase("asc")
-                ? Sort.by(sortBy).ascending()
-                : Sort.by(sortBy).descending();
-
-        List<User> users = userRepo.findAll(sortByAndOrder);
+        List<User> users = userRepo.findAll(CommonUtils.buildSort(sortBy, sortOrder));
         if (users.isEmpty())
             return  UsersDTO.builder()
                     .users(Collections.emptyList())

@@ -1,5 +1,6 @@
 package com.example.VideoRentalStore.movie.service;
 
+import com.example.VideoRentalStore.apputils.CommonUtils;
 import com.example.VideoRentalStore.coupon.model.Coupon;
 import com.example.VideoRentalStore.coupon.repo.CouponRepo;
 import com.example.VideoRentalStore.exceptionhandler.customexceptions.OutOfStockException;
@@ -170,9 +171,9 @@ public class MovieService {
         return MovieDTO.toDTO(movieRepo.save(movie));
     }
 
-    public MoviesDTO getAllMovies() {
+    public MoviesDTO getAllMovies(String sortBy, String sortOrder) {
 
-        List<Movie> movies = movieRepo.findAll();
+        List<Movie> movies = movieRepo.findAll(CommonUtils.buildSort(sortBy, sortOrder));
         if (movies.isEmpty())
             return MoviesDTO.builder()
                     .movies(Collections.emptyList())

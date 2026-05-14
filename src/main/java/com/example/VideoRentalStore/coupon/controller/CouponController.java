@@ -1,5 +1,6 @@
 package com.example.VideoRentalStore.coupon.controller;
 
+import com.example.VideoRentalStore.apputils.AppConstants;
 import com.example.VideoRentalStore.coupon.dtos.CouponDTO;
 import com.example.VideoRentalStore.coupon.dtos.CouponsDTO;
 import com.example.VideoRentalStore.coupon.service.CouponService;
@@ -60,12 +61,19 @@ public class CouponController {
 
     @GetMapping("/get-coupons")
     public ResponseEntity<ApiResponse<CouponsDTO>>getAllCoupons(
-            @RequestParam(required = false) Boolean isActive) {
+            @RequestParam(required = false) Boolean isActive,
+            @RequestParam(name = "sortBy",
+                    defaultValue = AppConstants.SORT_COUPONS_BY,
+                    required = false) String sortBy,
+            @RequestParam(name = "sortOrder",
+                    defaultValue = AppConstants.SORT_DIR,
+                    required = false) String sortOrder
+    ) {
 
         ApiResponse<CouponsDTO> response = ApiResponse.<CouponsDTO>builder()
                 .status(Status.OK)
                 .message("Coupons fetched Successfully")
-                .data(couponService.getAllCoupons(isActive))
+                .data(couponService.getAllCoupons(isActive, sortBy, sortOrder))
                 .build();
         return ResponseEntity.ok(response);
     }

@@ -1,5 +1,6 @@
 package com.example.VideoRentalStore.rental.service;
 
+import com.example.VideoRentalStore.apputils.CommonUtils;
 import com.example.VideoRentalStore.exceptionhandler.customexceptions.ResourceNotFoundException;
 import com.example.VideoRentalStore.rental.dtos.RentalListDTO;
 import com.example.VideoRentalStore.rental.dtos.UserRentalListDTO;
@@ -23,7 +24,8 @@ public class RentalService {
     private final RentalRepo rentalRepo;
     private final UserRepo userRepo;
 
-    public RentalListDTO getAllRentals(RentalStatus status) {
+    public RentalListDTO getAllRentals(RentalStatus status, String sortBy, String sortOrder) {
+
 
 //        if(status==null)
 //            return GetAllRentalsDTO.toDTO(rentalRepo.findAll());
@@ -35,7 +37,7 @@ public class RentalService {
 //            return GetAllRentalsDTO.toDTO(rentalRepo.findRentalByStatus(RentalStatus.RETURNED));
 
 
-        List<Rental> rentals = rentalRepo.findAll();
+        List<Rental> rentals = rentalRepo.findAll(CommonUtils.buildSort(sortBy, sortOrder));
         List<Rental> pendingRentals = new ArrayList<>();
         List<Rental> lossRentals = new ArrayList<>();
         List<Rental> returnedRentals = new ArrayList<>();

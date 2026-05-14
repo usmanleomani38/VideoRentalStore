@@ -1,7 +1,7 @@
 package com.example.VideoRentalStore.user.controller;
 
 
-import com.example.VideoRentalStore.appconstant.AppConstants;
+import com.example.VideoRentalStore.apputils.AppConstants;
 import com.example.VideoRentalStore.exceptionhandler.ApiResponse;
 import com.example.VideoRentalStore.exceptionhandler.Status;
 import com.example.VideoRentalStore.user.dtos.UserDTO;
@@ -9,7 +9,6 @@ import com.example.VideoRentalStore.user.dtos.UsersDTO;
 import com.example.VideoRentalStore.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
