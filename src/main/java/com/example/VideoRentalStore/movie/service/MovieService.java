@@ -18,6 +18,7 @@ import com.example.VideoRentalStore.rental.repo.RentalRepo;
 import com.example.VideoRentalStore.user.model.User;
 import com.example.VideoRentalStore.user.repo.UserRepo;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.text.WordUtils;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -44,7 +45,7 @@ public class MovieService {
                 });
 
         Movie movie = new Movie();
-        movie.setMovieName(movieDTO.getMovieName());
+        movie.setMovieName(WordUtils.capitalize(movieDTO.getMovieName()));
         movie.setDuration(movieDTO.getDuration());
         movie.setAvailableQuantity(movieDTO.getAvailableQuantity());
         movie.setReleaseYear(movieDTO.getReleaseYear());
@@ -159,7 +160,7 @@ public class MovieService {
         Movie movie = movieRepo.findById(movieId)
                         .orElseThrow(()-> new ResourceNotFoundException("Movie not found!"));
 
-        movie.setMovieName(movieDTO.getMovieName());
+        movie.setMovieName(WordUtils.capitalize(movieDTO.getMovieName()));
         movie.setDuration(movieDTO.getDuration());
         movie.setAvailableQuantity(movieDTO.getAvailableQuantity());
         movie.setReleaseYear(movieDTO.getReleaseYear());

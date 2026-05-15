@@ -14,8 +14,13 @@ import java.util.List;
 public class UsersDTO {
 
     private List<UserDTO> users;
+    private int pageNumber;
+    private int pageSize;
+    private Long totalElements;
+    private int totalPages;
 
-    public static UsersDTO toDTO(List<User> userList) {
+
+    public static UsersDTO toDTO(List<User> userList, Integer pageNumber, Integer pageSize, int totalPages, Long totalElements) {
 
         List<UserDTO> userDTOS = new ArrayList<>();
         for(User user : userList)
@@ -23,6 +28,10 @@ public class UsersDTO {
 
         return UsersDTO.builder()
                 .users(userDTOS)
+                .pageNumber(pageNumber)
+                .pageSize(pageSize)
+                .totalElements(totalElements)
+                .totalPages(totalPages)
                 .build();
     }
 }

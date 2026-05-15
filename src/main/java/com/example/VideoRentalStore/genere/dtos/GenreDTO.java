@@ -17,13 +17,7 @@ public class GenreDTO {
 
     private Long genreId;
     @NotBlank(message = "Genre name must not be blank")
-    @Size(
-            min = 3,
-            max = 50,
-            message = "Genre name must be between 3 and 50 characters")
-    @Pattern(
-            regexp = "^[a-zA-Z ]*$",
-            message = "Genre name must contain only letters")
+    @Size(min = 3, max = 50, message = "Genre name must be between 3 and 50 characters")
     private String genreName;
     private LocalDateTime createdAt;
 

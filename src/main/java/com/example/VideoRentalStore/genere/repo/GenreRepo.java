@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public interface GenreRepo extends JpaRepository<Genre, Long> {
 
-    @Query("Select g from Genre g WHERE g.genreName = ?1")
+    @Query("Select g from Genre g WHERE LOWER(g.genreName) = LOWER(?1)")
     Optional<Genre> findByGenreName(String genreName);
 
 }

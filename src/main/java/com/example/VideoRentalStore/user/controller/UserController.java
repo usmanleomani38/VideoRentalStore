@@ -5,12 +5,15 @@ import com.example.VideoRentalStore.apputils.AppConstants;
 import com.example.VideoRentalStore.exceptionhandler.ApiResponse;
 import com.example.VideoRentalStore.exceptionhandler.Status;
 import com.example.VideoRentalStore.user.dtos.UserDTO;
+import com.example.VideoRentalStore.user.dtos.UserListDTO;
 import com.example.VideoRentalStore.user.dtos.UsersDTO;
 import com.example.VideoRentalStore.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -62,6 +65,10 @@ public class UserController {
 
     @GetMapping("/get-all-user")
     public ResponseEntity<ApiResponse<UsersDTO>>getAllUsers(
+            @RequestParam(name = "pageNumber",
+                    defaultValue = AppConstants.PAGE_NUMBER, required = false) Integer pageNumber,
+            @RequestParam(name = "pageSize",
+                    defaultValue = AppConstants.PAGE_SIZE, required = false) Integer pageSize,
             @RequestParam(name = "sortBy",
                     defaultValue = AppConstants.SORT_USERS_BY,
                     required = false) String sortBy,
@@ -73,16 +80,16 @@ public class UserController {
             ApiResponse<UsersDTO> response = ApiResponse.<UsersDTO>builder()
                     .status(Status.OK)
                     .message("Users fetched Successfully")
-                    .data(userService.getAllUsers(sortBy, sortOrder))
+                    .data(userService.getAllUsers(sortBy, sortOrder,pageNumber, pageSize))
                     .build();
             return ResponseEntity.ok(response);
     }
 
 
         @GetMapping("/get-user-by-name")
-        public ResponseEntity<ApiResponse<UserDTO>>getUserByName(@RequestParam String userName) {
+        public ResponseEntity<ApiResponse<UserListDTO>>getUserByName(@RequestParam String userName) {
             float f = Float.parseFloat("3.124");
-            ApiResponse<UserDTO> response = ApiResponse.<UserDTO>builder()
+            ApiResponse<UserListDTO> response = ApiResponse.<UserListDTO>builder()
                     .status(Status.OK)
                     .message("User fetched Successfully")
                     .data(userService.getUserByName(userName))

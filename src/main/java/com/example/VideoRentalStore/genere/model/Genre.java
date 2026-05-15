@@ -22,4 +22,5 @@ public class Genre extends AuditFields {
 
     @ManyToMany(mappedBy = "genres")
     private List<Movie> movieList = new ArrayList<>();
+
 }

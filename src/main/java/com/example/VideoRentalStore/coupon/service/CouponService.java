@@ -22,7 +22,7 @@ public class CouponService {
     public CouponDTO addCoupon(CouponDTO couponDTO) {
 
         Coupon coupon = new Coupon();
-        coupon.setCouponCode(couponDTO.getCouponCode());
+        coupon.setCouponCode(couponDTO.getCouponCode().toUpperCase());
         coupon.setDiscountPercent(couponDTO.getDiscountPercent());
         coupon.setIsActive(couponDTO.getIsActive());
         coupon.setExpiryDate(couponDTO.getExpiryDate());
@@ -41,7 +41,7 @@ public class CouponService {
 
         Coupon coupon = couponRepo.findById(couponId)
                 .orElseThrow(() -> new ResourceNotFoundException("Coupon not found!"));
-        coupon.setCouponCode(couponDTO.getCouponCode());
+        coupon.setCouponCode(couponDTO.getCouponCode().toUpperCase());
         coupon.setDiscountPercent(couponDTO.getDiscountPercent());
         coupon.setIsActive(couponDTO.getIsActive());
         coupon.setExpiryDate(couponDTO.getExpiryDate());

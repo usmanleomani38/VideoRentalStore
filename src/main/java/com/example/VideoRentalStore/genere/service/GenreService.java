@@ -10,9 +10,9 @@ import com.example.VideoRentalStore.genere.dtos.MoviesCountDTO;
 import com.example.VideoRentalStore.movie.model.Movie;
 import com.example.VideoRentalStore.movie.repo.MovieRepo;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.text.WordUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -25,12 +25,16 @@ public class GenreService {
 
     public GenreDTO addGenre(GenreDTO genreDTO) {
 
+        if (!genreDTO.getGenreName().matches("^[a-zA-Z ]*$"))
+            throw new IllegalArgumentException("Genre Name contains only alphabets");
+
         genreRepo.findByGenreName(genreDTO.getGenreName())
                 .ifPresent(g->
                 { throw new RuntimeException("Genre already exists"); });
-        Genre newGenre = new Genre();
-        newGenre.setGenreName(genreDTO.getGenreName());
-        return GenreDTO.toDTO(genreRepo.save(newGenre));
+
+        Genre genre = new Genre();
+        genre.setGenreName(WordUtils.capitalize(genreDTO.getGenreName()));
+        return GenreDTO.toDTO(genreRepo.save(genre));
     }
 
     public String deleteByGenreId(Long genreId) {
@@ -50,7 +54,7 @@ public class GenreService {
 
         Genre genre = genreRepo.findById(genreId)
                 .orElseThrow(()-> new ResourceNotFoundException("Genre not found!"));
-        genre.setGenreName(genreDTO.getGenreName());
+        genre.setGenreName(WordUtils.capitalize(genreDTO.getGenreName()));
         return GenreDTO.toDTO(genreRepo.save(genre));
     }
 
@@ -69,8 +73,8 @@ public class GenreService {
             return GenresDTO.builder()
                     .genres(Collections.emptyList())
                     .build();
-        else
-            return GenresDTO.toDTO(new ArrayList<>(genres));
+
+        return GenresDTO.toDTO(genres);
     }
 
     public MoviesCountDTO countMovieByGenre() {
@@ -80,7 +84,7 @@ public class GenreService {
            return MoviesCountDTO.builder()
                     .genres(Collections.emptyList())
                     .build();
-        else
-          return MoviesCountDTO.toDTO(new ArrayList<>(genres));
+
+        return MoviesCountDTO.toDTO(genres);
     }
 }
