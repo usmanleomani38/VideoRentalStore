@@ -4,6 +4,7 @@ import com.example.VideoRentalStore.apputils.AppConstants;
 import com.example.VideoRentalStore.exceptionhandler.ApiResponse;
 import com.example.VideoRentalStore.exceptionhandler.Status;
 import com.example.VideoRentalStore.genere.dtos.GenreDTO;
+import com.example.VideoRentalStore.genere.dtos.GenreWithMoviesListDTO;
 import com.example.VideoRentalStore.genere.dtos.GenresDTO;
 import com.example.VideoRentalStore.genere.service.GenreService;
 import com.example.VideoRentalStore.genere.dtos.MoviesCountDTO;
@@ -64,6 +65,10 @@ public class GenreController {
 
     @GetMapping("/get-all-genre")
     public ResponseEntity<ApiResponse<GenresDTO>>getAllGenres(
+            @RequestParam(name = "pageNumber",
+                    defaultValue = AppConstants.PAGE_NUMBER, required = false) Integer pageNumber,
+            @RequestParam(name = "pageSize",
+                    defaultValue = AppConstants.PAGE_SIZE, required = false) Integer pageSize,
             @RequestParam(name = "sortBy",
                     defaultValue = AppConstants.SORT_GENRES_BY,
                     required = false) String sortBy,
@@ -75,7 +80,7 @@ public class GenreController {
         ApiResponse<GenresDTO> response = ApiResponse.<GenresDTO>builder()
                 .status(Status.OK)
                 .message("Genres fetched Successfully")
-                .data(genreService.getAllGenres(sortBy, sortOrder))
+                .data(genreService.getAllGenres(pageNumber, pageSize,sortBy, sortOrder))
                 .build();
         return ResponseEntity.ok(response);
     }
@@ -87,6 +92,17 @@ public class GenreController {
                 .status(Status.OK)
                 .message("Records fetched Successfully")
                 .data(genreService.countMovieByGenre())
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/movies-per-genre")
+    public ResponseEntity<ApiResponse<GenreWithMoviesListDTO>> getMoviesPerGenre() {
+
+        ApiResponse<GenreWithMoviesListDTO> response = ApiResponse.<GenreWithMoviesListDTO>builder()
+                .status(Status.OK)
+                .message("Records fetched Successfully")
+                .data(genreService.getMoviesPerGenre())
                 .build();
         return ResponseEntity.ok(response);
     }

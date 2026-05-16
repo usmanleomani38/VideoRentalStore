@@ -3,6 +3,7 @@ package com.example.VideoRentalStore.genere.service;
 import com.example.VideoRentalStore.apputils.CommonUtils;
 import com.example.VideoRentalStore.exceptionhandler.customexceptions.ResourceNotFoundException;
 import com.example.VideoRentalStore.genere.dtos.GenreDTO;
+import com.example.VideoRentalStore.genere.dtos.GenreWithMoviesListDTO;
 import com.example.VideoRentalStore.genere.dtos.GenresDTO;
 import com.example.VideoRentalStore.genere.model.Genre;
 import com.example.VideoRentalStore.genere.repo.GenreRepo;
@@ -11,6 +12,8 @@ import com.example.VideoRentalStore.movie.model.Movie;
 import com.example.VideoRentalStore.movie.repo.MovieRepo;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.text.WordUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -66,15 +69,19 @@ public class GenreService {
 
     }
 
-    public GenresDTO getAllGenres(String sortBy, String sortOrder) {
+    public GenresDTO getAllGenres(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
 
-        List<Genre> genres = genreRepo.findAll(CommonUtils.buildSort(sortBy, sortOrder));
+        PageRequest pageRequest = PageRequest.of(pageNumber,pageSize,CommonUtils.buildSort(sortBy, sortOrder));
+        Page<Genre> page = genreRepo.findAll(pageRequest);
+        var genres = page.getContent();
+        var totalPages = page.getTotalPages();
+        var totalElements = page.getTotalElements();
         if (genres.isEmpty())
             return GenresDTO.builder()
                     .genres(Collections.emptyList())
                     .build();
 
-        return GenresDTO.toDTO(genres);
+        return GenresDTO.toDTO(genres,pageNumber,pageSize, totalPages, totalElements);
     }
 
     public MoviesCountDTO countMovieByGenre() {
@@ -87,4 +94,19 @@ public class GenreService {
 
         return MoviesCountDTO.toDTO(genres);
     }
+
+    public GenreWithMoviesListDTO getMoviesPerGenre() {
+
+        List<Genre> genres = genreRepo.findAll();
+        if(genres.isEmpty())
+            return GenreWithMoviesListDTO.builder()
+                    .genres(Collections.emptyList())
+                    .build();
+
+        return GenreWithMoviesListDTO.toDTO(genres);
+
+    }
+
 }
+
+
