@@ -1,16 +1,12 @@
 package com.example.VideoRentalStore.genere.dtos;
 
 import com.example.VideoRentalStore.genere.model.Genre;
-import com.example.VideoRentalStore.movie.dtos.MovieDTO;
-import com.example.VideoRentalStore.movie.model.Movie;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
 @Setter

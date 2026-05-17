@@ -10,6 +10,7 @@ import com.example.VideoRentalStore.genere.repo.GenreRepo;
 import com.example.VideoRentalStore.genere.dtos.MoviesCountDTO;
 import com.example.VideoRentalStore.movie.model.Movie;
 import com.example.VideoRentalStore.movie.repo.MovieRepo;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.text.WordUtils;
 import org.springframework.data.domain.Page;
@@ -40,15 +41,15 @@ public class GenreService {
         return GenreDTO.toDTO(genreRepo.save(genre));
     }
 
+    @Transactional
     public String deleteByGenreId(Long genreId) {
 
        Genre genre = genreRepo.findById(genreId)
                .orElseThrow(()-> new ResourceNotFoundException("Genre not found"));
 
-        for(Movie movie : genre.getMovieList()) {
-            movie.getGenres().remove(movie);
-            movieRepo.save(movie);
-        }
+        for(Movie movie : genre.getMovieList())
+            movie.getGenres().remove(genre);
+        genre.getMovieList().clear();
         genreRepo.deleteById(genreId);
         return "Genre deleted successfully";
     }
@@ -76,6 +77,7 @@ public class GenreService {
         var genres = page.getContent();
         var totalPages = page.getTotalPages();
         var totalElements = page.getTotalElements();
+
         if (genres.isEmpty())
             return GenresDTO.builder()
                     .genres(Collections.emptyList())

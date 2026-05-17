@@ -2,13 +2,15 @@ package com.example.VideoRentalStore.movie.dtos;
 
 import com.example.VideoRentalStore.genere.model.Genre;
 import com.example.VideoRentalStore.movie.model.Movie;
+import com.example.VideoRentalStore.user.dtos.OnCreate;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -20,7 +22,7 @@ public class MovieDTO {
 
     private Long movieId;
     @NotBlank(message = "Movie name must not be blank")
-    @Size(min = 3, max = 100, message = "Movie name must be between 2 and 100 characters")
+    @Size(min = 3, max = 100, message = "Movie name must be between 3 and 100 characters")
     private String movieName;
 
     @Positive(message = "Duration must be a positive number")
@@ -37,17 +39,19 @@ public class MovieDTO {
     @DecimalMin(value = "0.0", inclusive = false, message = "Daily rental rate must be greater than 0")
     private Double dailyRentalRate;
 
-    @NotEmpty(message = "At least one genre must be provided")
-    private List<Long> genreIds;   //  for request
+    @NotEmpty(groups = OnCreate.class, message = "At least one genre must be provided")
+    private Set<Long> genreIds;   //  for request
     private List<String> genreNames; // for response
 
 
     public static MovieDTO toDTO(Movie movie) {
 
         List<String> genreNames = new ArrayList<>();
-        for(Genre genre : movie.getGenres())
+        Set<Long> genreSet = new HashSet<>();
+        for(Genre genre : movie.getGenres()) {
             genreNames.add(genre.getGenreName());
-
+            genreSet.add(genre.getGenreId());
+        }
         return MovieDTO.builder()
                 .movieId(movie.getBarcode())
                 .movieName(movie.getMovieName())
@@ -55,6 +59,7 @@ public class MovieDTO {
                 .releaseYear(movie.getReleaseYear())
                 .availableQuantity(movie.getAvailableQuantity())
                 .dailyRentalRate(movie.getDailyRentalRate())
+                .genreIds(genreSet)
                 .genreNames(genreNames)
                 .build();
     }

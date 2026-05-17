@@ -61,6 +61,12 @@ public class CouponController {
 
     @GetMapping("/get-coupons")
     public ResponseEntity<ApiResponse<CouponsDTO>>getAllCoupons(
+            @RequestParam(name = "pageNumber",
+                    defaultValue = AppConstants.PAGE_NUMBER,
+                    required = false) Integer pageNumber,
+            @RequestParam(name = "pageSize",
+                    defaultValue = AppConstants.PAGE_SIZE,
+                    required = false) Integer pageSize,
             @RequestParam(required = false) Boolean isActive,
             @RequestParam(name = "sortBy",
                     defaultValue = AppConstants.SORT_COUPONS_BY,
@@ -73,7 +79,7 @@ public class CouponController {
         ApiResponse<CouponsDTO> response = ApiResponse.<CouponsDTO>builder()
                 .status(Status.OK)
                 .message("Coupons fetched Successfully")
-                .data(couponService.getAllCoupons(isActive, sortBy, sortOrder))
+                .data(couponService.getAllCoupons(pageNumber, pageSize, isActive, sortBy, sortOrder))
                 .build();
         return ResponseEntity.ok(response);
     }

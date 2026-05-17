@@ -24,7 +24,9 @@ public class Movie extends AuditFields {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long barcode;
     private String movieName;
+    @Column(nullable = true)
     private Long duration;
+    @Column(nullable = true)
     private Integer releaseYear;
     private Integer availableQuantity;
     private Double dailyRentalRate;

@@ -7,6 +7,7 @@ import com.example.VideoRentalStore.user.dtos.UsersDTO;
 import com.example.VideoRentalStore.user.dtos.UserListDTO;
 import com.example.VideoRentalStore.user.model.User;
 import com.example.VideoRentalStore.user.repo.UserRepo;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.text.WordUtils;
 import org.springframework.data.domain.Page;
@@ -40,16 +41,18 @@ public class UserService {
          return UserDTO.toDTO(user);
     }
 
+    @Transactional
     public String deleteUserByUserId(Long userId) {
 
          User user = userRepo.findById(userId)
                  .orElseThrow(() -> new ResourceNotFoundException("User not found!"));
          if(!user.getRentals().isEmpty())
              throw new RuntimeException("User has rentals cannot delete!");
-         userRepo.deleteById(userId);
+         userRepo.delete(user);
          return "User deleted successfully";
     }
 
+    @Transactional
     public UserDTO updateUserByUserId(Long userId, UserDTO userDTO) {
 
         User user = userRepo.findById(userId)

@@ -15,10 +15,14 @@ import com.example.VideoRentalStore.rental.dto.response.RentalResponseDTO;
 import com.example.VideoRentalStore.rental.dtos.ReturnMovieResponseDTO;
 import com.example.VideoRentalStore.rental.model.Rental;
 import com.example.VideoRentalStore.rental.repo.RentalRepo;
+import com.example.VideoRentalStore.user.dtos.MovieUpdateDTO;
 import com.example.VideoRentalStore.user.model.User;
 import com.example.VideoRentalStore.user.repo.UserRepo;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.text.WordUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -26,6 +30,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -50,7 +55,6 @@ public class MovieService {
         movie.setAvailableQuantity(movieDTO.getAvailableQuantity());
         movie.setReleaseYear(movieDTO.getReleaseYear());
         movie.setDailyRentalRate(movieDTO.getDailyRentalRate());
-
         List<Genre> genreList = genreRepo.findAllById(movieDTO.getGenreIds());
         movie.setGenres(genreList);
         return MovieDTO.toDTO(movieRepo.save(movie));
@@ -63,6 +67,8 @@ public class MovieService {
         return MovieDTO.toDTO(movie);
 
     }
+
+    @Transactional
     public RentalResponseDTO assignMovieToUser(AssignMovieToUserDTO dto) {
         User user = userRepo.findById(dto.getUserId())
                 .orElseThrow(()-> new ResourceNotFoundException("User not found!"));
@@ -89,6 +95,7 @@ public class MovieService {
         return RentalResponseDTO.toDTO(user,rentals);
     }
 
+    @Transactional
     public ReturnMovieResponseDTO processReturn(ReturnMovieDTO dto) {
 
         Long totalDays = 0L;
@@ -146,19 +153,25 @@ public class MovieService {
                 totalAmount);
     }
 
+
+    @Transactional
     public String deleteMovieById(Long movieId) {
-        Movie movie = movieRepo.findById(movieId)
+        Movie existingMovie = movieRepo.findById(movieId)
                 .orElseThrow(()-> new ResourceNotFoundException("Movie not found!"));
-        if(!movie.getRentals().isEmpty())
-            throw new ResourceNotFoundException("Movie has active rentals — cannot delete!");
-        movieRepo.deleteById(movieId);
+        if(!existingMovie.getRentals().isEmpty())
+            throw new IllegalStateException("Movie has active rentals — cannot delete!");
+        for(Genre genre : existingMovie.getGenres())
+            genre.getMovieList().remove(existingMovie);
+        // existingMovie.getGenres().clear();
+        movieRepo.delete(existingMovie);
         return "Movie Deleted!";
     }
 
+    @Transactional
     public MovieDTO updateMovieById(Long movieId, MovieDTO movieDTO) {
 
         Movie movie = movieRepo.findById(movieId)
-                        .orElseThrow(()-> new ResourceNotFoundException("Movie not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Movie not found!"));
 
         movie.setMovieName(WordUtils.capitalize(movieDTO.getMovieName()));
         movie.setDuration(movieDTO.getDuration());
@@ -166,21 +179,31 @@ public class MovieService {
         movie.setReleaseYear(movieDTO.getReleaseYear());
         movie.setDailyRentalRate(movieDTO.getDailyRentalRate());
 
-        List<Genre> genreList = genreRepo.findAllById(movieDTO.getGenreIds());
-        movie.setGenres(genreList);
+        List<Genre> genreList = null;
+        if (movieDTO.getGenreIds() != null && !movieDTO.getGenreIds().isEmpty()) {
+            genreList = genreRepo.findAllById(movieDTO.getGenreIds());
+
+            if (genreList.size() != movieDTO.getGenreIds().size())
+                throw new ResourceNotFoundException("Some IDs are not present in the Database!");
+            movie.setGenres(genreList);
+        }
 
         return MovieDTO.toDTO(movieRepo.save(movie));
     }
 
-    public MoviesDTO getAllMovies(String sortBy, String sortOrder) {
+    public MoviesDTO getAllMovies(String sortBy, String sortOrder, Integer pageNumber, Integer pageSize) {
 
-        List<Movie> movies = movieRepo.findAll(CommonUtils.buildSort(sortBy, sortOrder));
+        PageRequest pageRequest = PageRequest.of(pageNumber,pageSize,CommonUtils.buildSort(sortBy, sortOrder));
+        Page<Movie> page = movieRepo.findAll(pageRequest);
+        var movies = page.getContent();
+        var totalPages = page.getTotalPages();
+        var totalElements = page.getTotalElements();
+
         if (movies.isEmpty())
             return MoviesDTO.builder()
                     .movies(Collections.emptyList())
                     .build();
-        else
-            return MoviesDTO.toDTO(new ArrayList<>(movies));
+        return MoviesDTO.toDTO(new ArrayList<>(movies), pageNumber,pageSize, totalPages, totalElements);
     }
 
     public MovieDTO getMovieByName(String movieName) {
@@ -193,13 +216,11 @@ public class MovieService {
     public MoviesDTO getMovieByGenreName(String genreName) {
 
         List<Movie> movies = movieRepo.findMoviesByGenreName(genreName);
-        if(movies.isEmpty()) {
+        if(movies.isEmpty())
             return MoviesDTO.builder()
                     .movies(Collections.emptyList())
                     .build();
-        }
-        else
-            return MoviesDTO.toDTO(new ArrayList<>(movies));
+        return MoviesDTO.toDTO(movies);
 
     }
 

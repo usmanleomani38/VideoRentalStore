@@ -7,9 +7,13 @@ import com.example.VideoRentalStore.movie.dtos.*;
 import com.example.VideoRentalStore.movie.service.MovieService;
 import com.example.VideoRentalStore.rental.dto.response.RentalResponseDTO;
 import com.example.VideoRentalStore.rental.dtos.ReturnMovieResponseDTO;
+import com.example.VideoRentalStore.user.dtos.MovieUpdateDTO;
+import com.example.VideoRentalStore.user.dtos.OnCreate;
+import com.example.VideoRentalStore.user.dtos.OnUpdate;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -21,7 +25,9 @@ public class MovieController {
     private final MovieService movieService;
 
     @PostMapping("/add-movie")
-    public ResponseEntity<ApiResponse<MovieDTO>> addMovie(@Valid @RequestBody MovieDTO movieDTO) {
+    public ResponseEntity<ApiResponse<MovieDTO>> addMovie(@Validated(OnCreate.class)
+                                                              @RequestBody MovieDTO movieDTO) {
+
         ApiResponse<MovieDTO> response = ApiResponse.<MovieDTO>builder()
                 .status(Status.CREATED)
                 .message("Movie added successfully")
@@ -51,7 +57,8 @@ public class MovieController {
     }
 
     @PutMapping("/update-movie/{movieId}")
-    public ResponseEntity<ApiResponse<MovieDTO>> updateMovieById(@PathVariable Long movieId, @RequestBody MovieDTO movieDTO) {
+    public ResponseEntity<ApiResponse<MovieDTO>> updateMovieById(@PathVariable Long movieId,
+                                                                 @Valid @RequestBody MovieDTO movieDTO) {
         ApiResponse<MovieDTO> response = ApiResponse.<MovieDTO>builder()
                 .status(Status.OK)
                 .message("Movie updated successfully")
@@ -62,6 +69,10 @@ public class MovieController {
 
     @GetMapping("/get-all-movies")
     public ResponseEntity<ApiResponse<MoviesDTO>>getAllMovies(
+            @RequestParam(name = "pageNumber",
+                    defaultValue = AppConstants.PAGE_NUMBER, required = false) Integer pageNumber,
+            @RequestParam(name = "pageSize",
+                    defaultValue = AppConstants.PAGE_SIZE, required = false) Integer pageSize,
             @RequestParam(name = "sortBy",
                     defaultValue = AppConstants.SORT_MOVIES_BY,
                     required = false) String sortBy,
@@ -73,7 +84,7 @@ public class MovieController {
         ApiResponse<MoviesDTO> response = ApiResponse.<MoviesDTO>builder()
                 .status(Status.OK)
                 .message("Movies fetched Successfully")
-                .data(movieService.getAllMovies(sortBy, sortOrder))
+                .data(movieService.getAllMovies(sortBy, sortOrder, pageNumber, pageSize))
                 .build();
         return ResponseEntity.ok(response);
     }

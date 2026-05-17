@@ -6,7 +6,11 @@ import com.example.VideoRentalStore.coupon.dtos.CouponsDTO;
 import com.example.VideoRentalStore.coupon.model.Coupon;
 import com.example.VideoRentalStore.coupon.repo.CouponRepo;
 import com.example.VideoRentalStore.exceptionhandler.customexceptions.ResourceNotFoundException;
+import com.example.VideoRentalStore.user.model.User;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -29,6 +33,7 @@ public class CouponService {
         return CouponDTO.toDTO(couponRepo.save(coupon));
     }
 
+
     public String deleteCouponById(Long couponId) {
 
         if (!couponRepo.existsById(couponId))
@@ -37,6 +42,7 @@ public class CouponService {
         return "Coupon Deleted!";
     }
 
+    @Transactional
     public CouponDTO updateCouponById(Long couponId, CouponDTO couponDTO) {
 
         Coupon coupon = couponRepo.findById(couponId)
@@ -57,9 +63,14 @@ public class CouponService {
 
     }
 
-    public CouponsDTO getAllCoupons(Boolean isActive, String sortBy, String sortOrder ) {
+    public CouponsDTO getAllCoupons(Integer pageNumber, Integer pageSize, Boolean isActive, String sortBy, String sortOrder ) {
 
-        List<Coupon> coupons = couponRepo.findAll(CommonUtils.buildSort(sortBy, sortOrder));
+        PageRequest pageRequest = PageRequest.of(pageNumber,pageSize,CommonUtils.buildSort(sortBy, sortOrder));
+        Page<Coupon> page = couponRepo.findAll(pageRequest);
+        var coupons = page.getContent();
+        var totalPages = page.getTotalPages();
+        var totalElements = page.getTotalElements();
+
         List<Coupon> activeCoupons = new ArrayList<>();
         List<Coupon> deActiveCoupons = new ArrayList<>();
         if (coupons.isEmpty())
@@ -68,7 +79,7 @@ public class CouponService {
                     .build();
 
         if(isActive == null)
-            return CouponsDTO.toDTO(new ArrayList<>(coupons));
+            return CouponsDTO.toDTO(new ArrayList<>(coupons), pageNumber,pageSize, totalPages, totalElements);
 
         if (isActive) {
             for (Coupon coupon : coupons) {
@@ -85,7 +96,7 @@ public class CouponService {
         }
 
        return !activeCoupons.isEmpty()
-         ? CouponsDTO.toDTO(new ArrayList<>(activeCoupons)) :
-         CouponsDTO.toDTO(new ArrayList<>(deActiveCoupons));
+         ? CouponsDTO.toDTO(new ArrayList<>(activeCoupons), pageNumber,pageSize, totalPages, totalElements) :
+         CouponsDTO.toDTO(new ArrayList<>(deActiveCoupons), pageNumber,pageSize, totalPages, totalElements);
     }
 }
