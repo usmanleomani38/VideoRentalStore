@@ -29,12 +29,10 @@ public class GenreService {
 
     public GenreDTO addGenre(GenreDTO genreDTO) {
 
-        if (!genreDTO.getGenreName().matches("^[a-zA-Z ]*$"))
-            throw new IllegalArgumentException("Genre Name contains only alphabets");
-
         genreRepo.findByGenreName(genreDTO.getGenreName())
-                .ifPresent(g->
-                { throw new RuntimeException("Genre already exists"); });
+                .ifPresent(g-> {
+                    throw new RuntimeException("Genre already exists");
+                });
 
         Genre genre = new Genre();
         genre.setGenreName(WordUtils.capitalize(genreDTO.getGenreName()));
@@ -57,7 +55,18 @@ public class GenreService {
     public GenreDTO updateGenreById(Long genreId, GenreDTO genreDTO) {
 
         Genre genre = genreRepo.findById(genreId)
-                .orElseThrow(()-> new ResourceNotFoundException("Genre not found!"));
+                .orElseThrow(()-> new ResourceNotFoundException(
+                        "Genre not found!"
+                ));
+
+        genreRepo.findByGenreName(genreDTO.getGenreName())
+                .ifPresent(g-> {
+                    if(!genre.getGenreId().equals(genreId))
+                        throw new RuntimeException(
+                                "Genre already exists"
+                        );
+                });
+
         genre.setGenreName(WordUtils.capitalize(genreDTO.getGenreName()));
         return GenreDTO.toDTO(genreRepo.save(genre));
     }

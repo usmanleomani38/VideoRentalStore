@@ -3,6 +3,8 @@ package com.example.VideoRentalStore.user.repo;
 import com.example.VideoRentalStore.rental.model.Rental;
 import com.example.VideoRentalStore.rental.model.RentalStatus;
 import com.example.VideoRentalStore.user.model.User;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,7 +17,7 @@ import java.util.Optional;
 public interface UserRepo extends JpaRepository<User, Long> {
 
    @Query("SELECT u from User u WHERE u.contactNo = :contactNo")
-   Optional<User> findByContactNo(@Param("contactNo") Long contactNo);
+   Optional<User> findByContactNo(@Param("contactNo") String contactNo);
 
     @Query("SELECT u FROM User u WHERE u.userName = ?1")
     Optional<User> findByUserName(String userName);
@@ -30,4 +32,6 @@ public interface UserRepo extends JpaRepository<User, Long> {
     @Query("SELECT r FROM Rental r WHERE r.user.userId = ?1 AND r.status = ?2")
     List<Rental> findByUserIdAndStatus(Long userId, RentalStatus rentalStatus);
 
+    @Query("SELECT u FROM User u WHERE u.email = ?1")
+    Optional<User> findByEmail(String email);
 }

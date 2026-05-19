@@ -104,10 +104,16 @@ public class MovieController {
     @GetMapping("/get-movie-by-genre-name")
     public ResponseEntity<ApiResponse<MoviesDTO>>getMovieByGenreName(@RequestParam String genreName) {
 
+        MoviesDTO moviesDTO = movieService.getMovieByGenreName(genreName);
+        boolean isEmpty = moviesDTO == null || moviesDTO.getMovies().isEmpty();
+        String message = isEmpty
+                ? "No Records found!"
+                : "Movies fetched Successfully";
+
         ApiResponse<MoviesDTO> response = ApiResponse.<MoviesDTO>builder()
                 .status(Status.OK)
-                .message("Movies fetched Successfully")
-                .data(movieService.getMovieByGenreName(genreName))
+                .message(message)
+                .data(moviesDTO)
                 .build();
         return ResponseEntity.ok(response);
     }
@@ -123,7 +129,7 @@ public class MovieController {
     }
 
     @PostMapping("/return")
-    public ResponseEntity<ApiResponse<ReturnMovieResponseDTO>> processMovie(@RequestBody ReturnMovieDTO dto) {
+    public ResponseEntity<ApiResponse<ReturnMovieResponseDTO>> processMovie(@RequestBody ReturnMoviesDTO dto) {
         ApiResponse<ReturnMovieResponseDTO> response = ApiResponse.<ReturnMovieResponseDTO>builder()
                 .status(Status.OK)
                 .message("Return processed successfully")

@@ -11,7 +11,7 @@ import lombok.*;
 public class UserDTOForResponse {
 
     private String userName;
-    private Long contactNo;
+    private String contactNo;
 
     public static UserDTOForResponse toDTO(User user) {
         return UserDTOForResponse.builder()

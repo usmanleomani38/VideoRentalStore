@@ -9,15 +9,16 @@ import com.example.VideoRentalStore.user.dtos.UserListDTO;
 import com.example.VideoRentalStore.user.dtos.UsersDTO;
 import com.example.VideoRentalStore.user.service.UserService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")
+@Validated
 public class UserController {
 
     private final UserService userService;
@@ -33,7 +34,10 @@ public class UserController {
     }
 
     @GetMapping("/get-user/{phoneNo}")
-    public ResponseEntity<ApiResponse<UserDTO>> getUserByPhoneNo(@PathVariable Long phoneNo) {
+    public ResponseEntity<ApiResponse<UserDTO>> getUserByPhoneNo(@PathVariable
+                                                                     @Pattern(regexp = "^[0-9]+$",
+                                                                             message = "Only digits allowed")
+                                                                     String phoneNo) {
         ApiResponse<UserDTO> response = ApiResponse.<UserDTO>builder()
                 .status(Status.OK)
                 .message("User fetched successfully")

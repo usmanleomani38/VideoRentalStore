@@ -29,7 +29,7 @@ public class CouponDTO {
 
     @NotNull(message = "Expiry date is required")
     @Future(message = "Expiry date must be in the future")
-    private LocalDate expiryDate;
+    private LocalDateTime expiryDate;
     private LocalDateTime createdAt;
 
     public static CouponDTO toDTO(Coupon coupon) {

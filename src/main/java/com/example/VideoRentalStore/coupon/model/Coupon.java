@@ -25,7 +25,7 @@ public class Coupon extends AuditFields {
     private Double discountPercent;
     private Boolean isActive;
     @JsonFormat(pattern = "yyyy-MM-dd")
-    private LocalDate expiryDate;
+    private LocalDateTime expiryDate;
 
 
 }

@@ -11,7 +11,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ReturnMovieDTO {
+public class ReturnMoviesDTO {
 
     private List<ReturnItemDTO> movies;
     private String couponCode;

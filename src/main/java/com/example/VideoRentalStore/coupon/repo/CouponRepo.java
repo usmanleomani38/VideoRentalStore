@@ -11,7 +11,9 @@ import java.util.Optional;
 
 public interface CouponRepo extends JpaRepository<Coupon, Long> {
 
-    @Query("SELECT c FROM Coupon c WHERE c.couponCode =:couponCode")
+    @Query("SELECT c FROM Coupon c WHERE LOWER(c.couponCode) = LOWER(:couponCode)")
     Optional<Coupon> findByCouponCode(@Param("couponCode")String couponCode);
+
+
 
 }

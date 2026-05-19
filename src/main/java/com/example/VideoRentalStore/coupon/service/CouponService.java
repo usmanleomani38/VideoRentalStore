@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -25,11 +26,21 @@ public class CouponService {
 
     public CouponDTO addCoupon(CouponDTO couponDTO) {
 
+        couponRepo.findByCouponCode(couponDTO.getCouponCode())
+                .ifPresent(c-> {
+                    throw new IllegalStateException(
+                            "This Coupon Code already exists!"
+                    );
+                });
+
         Coupon coupon = new Coupon();
         coupon.setCouponCode(couponDTO.getCouponCode().toUpperCase());
         coupon.setDiscountPercent(couponDTO.getDiscountPercent());
-        coupon.setIsActive(couponDTO.getIsActive());
         coupon.setExpiryDate(couponDTO.getExpiryDate());
+//        if(coupon.getExpiryDate().isBefore(LocalDateTime.now()))
+//            coupon.setIsActive(false);
+        coupon.setIsActive(couponDTO.getIsActive());
+
         return CouponDTO.toDTO(couponRepo.save(coupon));
     }
 
@@ -37,7 +48,9 @@ public class CouponService {
     public String deleteCouponById(Long couponId) {
 
         if (!couponRepo.existsById(couponId))
-            throw new ResourceNotFoundException("Coupon not exists!");
+            throw new ResourceNotFoundException(
+                    "Coupon not exists!"
+            );
         couponRepo.deleteById(couponId);
         return "Coupon Deleted!";
     }
@@ -47,6 +60,15 @@ public class CouponService {
 
         Coupon coupon = couponRepo.findById(couponId)
                 .orElseThrow(() -> new ResourceNotFoundException("Coupon not found!"));
+
+        couponRepo.findByCouponCode(couponDTO.getCouponCode())
+                .ifPresent(c-> {
+                    if(!coupon.getCouponId().equals(couponId))
+                        throw new IllegalStateException(
+                                "This Coupon Code already exists!"
+                        );
+                });
+
         coupon.setCouponCode(couponDTO.getCouponCode().toUpperCase());
         coupon.setDiscountPercent(couponDTO.getDiscountPercent());
         coupon.setIsActive(couponDTO.getIsActive());
@@ -58,7 +80,9 @@ public class CouponService {
     public CouponDTO getCouponById(Long couponId) {
 
         Coupon coupon = couponRepo.findById(couponId)
-                .orElseThrow(() -> new ResourceNotFoundException("Coupon not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Coupon not found!"
+                ));
         return CouponDTO.toDTO(coupon);
 
     }
@@ -96,7 +120,7 @@ public class CouponService {
         }
 
        return !activeCoupons.isEmpty()
-         ? CouponsDTO.toDTO(new ArrayList<>(activeCoupons), pageNumber,pageSize, totalPages, totalElements) :
-         CouponsDTO.toDTO(new ArrayList<>(deActiveCoupons), pageNumber,pageSize, totalPages, totalElements);
+         ? CouponsDTO.toDTO(activeCoupons, pageNumber,pageSize, totalPages, totalElements) :
+         CouponsDTO.toDTO(deActiveCoupons, pageNumber,pageSize, totalPages, totalElements);
     }
 }

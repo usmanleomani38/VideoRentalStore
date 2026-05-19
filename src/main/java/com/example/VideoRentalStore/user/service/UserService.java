@@ -12,10 +12,8 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.text.WordUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -26,6 +24,12 @@ public class UserService {
     private final UserRepo userRepo;
 
     public UserDTO registerUser(UserDTO userDTO) {
+
+            userRepo.findByEmail(userDTO.getEmail())
+                    .ifPresent(u -> {
+                        throw new IllegalStateException("This email is already Registered!");
+                    });
+
             User newUser = new User();
             newUser.setUserName(WordUtils.capitalize(userDTO.getUserName()));
             newUser.setContactNo(userDTO.getContactNo());
@@ -34,11 +38,14 @@ public class UserService {
             return UserDTO.toDTO(userRepo.save(newUser));
     }
 
+    public UserDTO getUserByPhoneNo(String phoneNo) {
 
-    public UserDTO getUserByPhoneNo(Long phoneNo) {
-         User user = userRepo.findByContactNo(phoneNo)
-                 .orElseThrow(()-> new ResourceNotFoundException("User not found!"));
-         return UserDTO.toDTO(user);
+//        if (!phoneNo.matches("^[0-9]+$"))
+//            throw new IllegalArgumentException("Phone number contains only digits");
+
+        User user = userRepo.findByContactNo(phoneNo)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found!"));
+        return UserDTO.toDTO(user);
     }
 
     @Transactional
@@ -57,10 +64,19 @@ public class UserService {
 
         User user = userRepo.findById(userId)
                 .orElseThrow(()-> new ResourceNotFoundException("User not found!"));
-        user.setUserName(userDTO.getUserName());
+
+        userRepo.findByEmail(userDTO.getEmail())
+                .ifPresent(u -> {
+                    if(!user.getUserId().equals(userId))
+                        throw new IllegalStateException(
+                                "This email is already Registered!"
+                        );
+                });
+
+        user.setUserName(WordUtils.capitalize(userDTO.getUserName()));
         user.setContactNo(userDTO.getContactNo());
         user.setEmail(userDTO.getEmail());
-        user.setAddress(userDTO.getAddress());
+        user.setAddress(WordUtils.capitalize(userDTO.getAddress()));
         return UserDTO.toDTO(userRepo.save(user));
     }
 

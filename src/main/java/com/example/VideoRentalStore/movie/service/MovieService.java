@@ -15,7 +15,6 @@ import com.example.VideoRentalStore.rental.dto.response.RentalResponseDTO;
 import com.example.VideoRentalStore.rental.dtos.ReturnMovieResponseDTO;
 import com.example.VideoRentalStore.rental.model.Rental;
 import com.example.VideoRentalStore.rental.repo.RentalRepo;
-import com.example.VideoRentalStore.user.dtos.MovieUpdateDTO;
 import com.example.VideoRentalStore.user.model.User;
 import com.example.VideoRentalStore.user.repo.UserRepo;
 import jakarta.transaction.Transactional;
@@ -23,14 +22,15 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.text.WordUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -44,7 +44,8 @@ public class MovieService {
 
 
     public MovieDTO addMovie(MovieDTO movieDTO) {
-        movieRepo.findByMovieName(movieDTO.getMovieName())
+
+        movieRepo.findByMovieNameIgnoreCase(movieDTO.getMovieName())
                 .ifPresent(m -> {
                     throw new RuntimeException("This movie already exists");
                 });
@@ -70,6 +71,7 @@ public class MovieService {
 
     @Transactional
     public RentalResponseDTO assignMovieToUser(AssignMovieToUserDTO dto) {
+
         User user = userRepo.findById(dto.getUserId())
                 .orElseThrow(()-> new ResourceNotFoundException("User not found!"));
 
@@ -96,7 +98,7 @@ public class MovieService {
     }
 
     @Transactional
-    public ReturnMovieResponseDTO processReturn(ReturnMovieDTO dto) {
+    public ReturnMovieResponseDTO processReturn(ReturnMoviesDTO dto) {
 
         Long totalDays = 0L;
         double totalAmount = 0D;
@@ -110,6 +112,12 @@ public class MovieService {
             Rental rental = rentalRepo.findByMovieId(returnItemDTO.getMovieId())
                     .orElseThrow(() -> new ResourceNotFoundException("Movie not found!"));
 
+            if(rental.getStatus().equals(RentalStatus.RETURNED)
+                    || rental.getStatus().equals(RentalStatus.LOSS))
+                throw new IllegalStateException(
+                        "This movie is already processed!"
+                );
+
             Movie movie = rental.getMovie();
             if (returnItemDTO.getStatus() == RentalStatus.RETURNED) {
                 totalDays = ChronoUnit.DAYS.between(rental.getRentalDate(), LocalDate.now().plusDays(2));
@@ -121,12 +129,16 @@ public class MovieService {
                 movie.setAvailableQuantity(movie.getAvailableQuantity() + 1);
 
             }
-            else {
+            else if (returnItemDTO.getStatus().equals(RentalStatus.LOSS)) {
                 rental.setStatus(RentalStatus.LOSS);
                 lossAmount = 5 * movie.getDailyRentalRate();
                 rental.setTotalAmount(lossAmount);
                 totalAmount += lossAmount;
             }
+            else
+                throw new IllegalArgumentException(
+                        "Invalid Status!"
+                );
 
             movieRepo.save(movie);
             rentals.add(rentalRepo.save(rental));
@@ -139,7 +151,7 @@ public class MovieService {
                     .orElseThrow(()-> new ResourceNotFoundException("Invalid Coupon"));
             if(!coupon.getIsActive())
               throw new RuntimeException("Coupon is not active");
-            if(coupon.getExpiryDate().isBefore(LocalDate.now()))
+            if(coupon.getExpiryDate().isBefore(LocalDateTime.now()))
                 throw new RuntimeException("Coupon is expired");
             double discountAmount = totalAmount * (coupon.getDiscountPercent() / 100.0);
             double finalAmount = totalAmount - discountAmount;
@@ -156,8 +168,10 @@ public class MovieService {
 
     @Transactional
     public String deleteMovieById(Long movieId) {
+
         Movie existingMovie = movieRepo.findById(movieId)
                 .orElseThrow(()-> new ResourceNotFoundException("Movie not found!"));
+
         if(!existingMovie.getRentals().isEmpty())
             throw new IllegalStateException("Movie has active rentals — cannot delete!");
         for(Genre genre : existingMovie.getGenres())
@@ -172,6 +186,14 @@ public class MovieService {
 
         Movie movie = movieRepo.findById(movieId)
                 .orElseThrow(() -> new ResourceNotFoundException("Movie not found!"));
+
+        movieRepo.findByMovieNameIgnoreCase(movieDTO.getMovieName())
+                .ifPresent(c-> {
+                    if(!movie.getBarcode().equals(movieId))
+                        throw new IllegalStateException(
+                                "This Movie already exists!"
+                        );
+                });
 
         movie.setMovieName(WordUtils.capitalize(movieDTO.getMovieName()));
         movie.setDuration(movieDTO.getDuration());

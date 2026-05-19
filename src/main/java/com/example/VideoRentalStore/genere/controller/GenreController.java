@@ -54,7 +54,8 @@ public class GenreController {
     }
 
     @PutMapping("/update-genre/{genreId}")
-    public ResponseEntity<ApiResponse<GenreDTO>> updateGenreById(@PathVariable Long genreId, @RequestBody GenreDTO genreDTO) {
+    public ResponseEntity<ApiResponse<GenreDTO>> updateGenreById(@PathVariable Long genreId,
+                                                                 @Valid @RequestBody GenreDTO genreDTO) {
         ApiResponse<GenreDTO> response = ApiResponse.<GenreDTO>builder()
                 .status(Status.OK)
                 .message("Genre Deleted Successfully")

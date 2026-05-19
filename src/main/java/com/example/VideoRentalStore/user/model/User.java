@@ -9,12 +9,16 @@ import lombok.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity
+
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Table(uniqueConstraints = {
+        @UniqueConstraint(columnNames = "email")
+})
+@Entity
 public class User extends AuditFields {
 
     @Id
@@ -22,7 +26,7 @@ public class User extends AuditFields {
     private Long userId;
     private String userName;
     @Column(unique = true)
-    private Long contactNo;
+    private String contactNo;
     @Column(unique = true)
     private String email;
     private String address;
