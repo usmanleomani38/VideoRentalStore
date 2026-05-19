@@ -24,7 +24,11 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/register-user")
-    public ResponseEntity<ApiResponse<UserDTO>> registerUser(@Valid @RequestBody UserDTO registerUserDto) {
+    public ResponseEntity<ApiResponse<UserDTO>> registerUser(
+                                                    @Valid
+                                                    @RequestBody
+                                                    UserDTO registerUserDto) {
+
         ApiResponse<UserDTO> response = ApiResponse.<UserDTO>builder()
                 .status(Status.CREATED)
                 .message("User registered successfully")
@@ -35,9 +39,9 @@ public class UserController {
 
     @GetMapping("/get-user/{phoneNo}")
     public ResponseEntity<ApiResponse<UserDTO>> getUserByPhoneNo(@PathVariable
-                                                                     @Pattern(regexp = "^[0-9]+$",
-                                                                             message = "Only digits allowed")
+                                                                     @Pattern(regexp = "^[0-9]+$", message = "Only digits allowed")
                                                                      String phoneNo) {
+
         ApiResponse<UserDTO> response = ApiResponse.<UserDTO>builder()
                 .status(Status.OK)
                 .message("User fetched successfully")
@@ -47,7 +51,10 @@ public class UserController {
     }
 
     @DeleteMapping("/delete-user/{userId}")
-    public ResponseEntity<ApiResponse<String>> deleteUserById(@PathVariable Long userId) {
+    public ResponseEntity<ApiResponse<String>> deleteUserById(
+                                                        @PathVariable
+                                                        Long userId) {
+
         ApiResponse<String> response = ApiResponse.<String>builder()
                 .status(Status.OK)
                 .message("User deleted successfully")
@@ -57,8 +64,12 @@ public class UserController {
     }
 
     @PutMapping("/update-user/{userId}")
-    public ResponseEntity<ApiResponse<UserDTO>> updateUserById(@PathVariable Long userId,
-                                                               @Valid @RequestBody UserDTO userDTO) {
+    public ResponseEntity<ApiResponse<UserDTO>> updateUserById(@PathVariable
+                                                                   Long userId,
+                                                               @Valid
+                                                               @RequestBody
+                                                               UserDTO userDTO) {
+
         ApiResponse<UserDTO> response = ApiResponse.<UserDTO>builder()
                 .status(Status.OK)
                 .message("User updated successfully")
@@ -68,30 +79,44 @@ public class UserController {
     }
 
     @GetMapping("/get-all-user")
-    public ResponseEntity<ApiResponse<UsersDTO>>getAllUsers(
+    public ResponseEntity<ApiResponse<UsersDTO>> getAllUsers(
             @RequestParam(name = "pageNumber",
-                    defaultValue = AppConstants.PAGE_NUMBER, required = false) Integer pageNumber,
+                    defaultValue = AppConstants.PAGE_NUMBER,
+                    required = false)
+            Integer pageNumber,
             @RequestParam(name = "pageSize",
-                    defaultValue = AppConstants.PAGE_SIZE, required = false) Integer pageSize,
+                    defaultValue = AppConstants.PAGE_SIZE,
+                    required = false)
+            Integer pageSize,
             @RequestParam(name = "sortBy",
                     defaultValue = AppConstants.SORT_USERS_BY,
-                    required = false) String sortBy,
+                    required = false)
+            String sortBy,
             @RequestParam(name = "sortOrder",
                     defaultValue = AppConstants.SORT_DIR,
-                    required = false) String sortOrder
+                    required = false)
+            String sortOrder
     ) {
+
+        UsersDTO usersDTO = userService.getAllUsers(sortBy, sortOrder,pageNumber, pageSize);
+        boolean isEmpty = usersDTO == null || usersDTO.getUsers().isEmpty();
+        String message = isEmpty
+                ? "No Records Found!"
+                : "Users fetched Successfully ";
 
             ApiResponse<UsersDTO> response = ApiResponse.<UsersDTO>builder()
                     .status(Status.OK)
-                    .message("Users fetched Successfully")
-                    .data(userService.getAllUsers(sortBy, sortOrder,pageNumber, pageSize))
+                    .message(message)
+                    .data(usersDTO)
                     .build();
             return ResponseEntity.ok(response);
     }
 
 
         @GetMapping("/get-user-by-name")
-        public ResponseEntity<ApiResponse<UserListDTO>>getUserByName(@RequestParam String userName) {
+        public ResponseEntity<ApiResponse<UserListDTO>>getUserByName(
+                                                            @RequestParam
+                                                            String userName) {
             float f = Float.parseFloat("3.124");
             ApiResponse<UserListDTO> response = ApiResponse.<UserListDTO>builder()
                     .status(Status.OK)

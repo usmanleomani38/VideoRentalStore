@@ -1,5 +1,6 @@
 package com.example.VideoRentalStore.movie.service;
 
+import ch.qos.logback.core.pattern.parser.OptionTokenizer;
 import com.example.VideoRentalStore.apputils.CommonUtils;
 import com.example.VideoRentalStore.coupon.model.Coupon;
 import com.example.VideoRentalStore.coupon.repo.CouponRepo;
@@ -12,7 +13,7 @@ import com.example.VideoRentalStore.movie.dtos.*;
 import com.example.VideoRentalStore.movie.model.Movie;
 import com.example.VideoRentalStore.movie.repo.MovieRepo;
 import com.example.VideoRentalStore.rental.dto.response.RentalResponseDTO;
-import com.example.VideoRentalStore.rental.dtos.ReturnMovieResponseDTO;
+import com.example.VideoRentalStore.movie.dtos.ReturnMovieResponseDTO;
 import com.example.VideoRentalStore.rental.model.Rental;
 import com.example.VideoRentalStore.rental.repo.RentalRepo;
 import com.example.VideoRentalStore.user.model.User;
@@ -22,7 +23,6 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.text.WordUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -31,6 +31,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -79,6 +80,9 @@ public class MovieService {
         for(Long barcode : dto.getBarcodes()) {
             Movie movie = movieRepo.findById(barcode)
                     .orElseThrow(()-> new ResourceNotFoundException("Movie not found!"));
+
+            if(rentalRepo.existsByMovieIdAndUserIdAndStatus(barcode, dto.getUserId(), RentalStatus.PENDING))
+                    throw new IllegalStateException("Movie is already rented by the user");
             Rental rental = new Rental();
             rental.setMovie(movie);
             rental.setUser(user);
@@ -92,6 +96,7 @@ public class MovieService {
             movieRepo.save(movie);
             rentals.add(rentalRepo.save(rental));
             movie.getRentals().add(rental);
+
             user.getRentals().add(rental);
         }
         return RentalResponseDTO.toDTO(user,rentals);
@@ -107,17 +112,18 @@ public class MovieService {
         Double grandTotal = 0D;
 
         List<Rental> rentals = new ArrayList<>();
-        User user = null;
-        for (ReturnItemDTO returnItemDTO : dto.getMovies()) {
-            Rental rental = rentalRepo.findByMovieId(returnItemDTO.getMovieId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Movie not found!"));
 
-            if(rental.getStatus().equals(RentalStatus.RETURNED)
-                    || rental.getStatus().equals(RentalStatus.LOSS))
+        for (ReturnItemDTO returnItemDTO : dto.getRentals()) {
+            Rental rental = rentalRepo.findById(returnItemDTO.getRentalId())
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Rental not found!"
+                    ));
+
+
+            if(rental.getStatus() != RentalStatus.PENDING)
                 throw new IllegalStateException(
-                        "This movie is already processed!"
+                        "This movie is already processed! "+rental.getMovie().getBarcode()
                 );
-
             Movie movie = rental.getMovie();
             if (returnItemDTO.getStatus() == RentalStatus.RETURNED) {
                 totalDays = ChronoUnit.DAYS.between(rental.getRentalDate(), LocalDate.now().plusDays(2));
@@ -129,7 +135,7 @@ public class MovieService {
                 movie.setAvailableQuantity(movie.getAvailableQuantity() + 1);
 
             }
-            else if (returnItemDTO.getStatus().equals(RentalStatus.LOSS)) {
+            else if (returnItemDTO.getStatus() == (RentalStatus.LOSS)) {
                 rental.setStatus(RentalStatus.LOSS);
                 lossAmount = 5 * movie.getDailyRentalRate();
                 rental.setTotalAmount(lossAmount);
@@ -142,27 +148,29 @@ public class MovieService {
 
             movieRepo.save(movie);
             rentals.add(rentalRepo.save(rental));
-            user = rental.getUser();
         }
 
         Coupon coupon = null;
-        if(dto.getCouponCode() != null) {
-          coupon = couponRepo.findByCouponCode(dto.getCouponCode())
-                    .orElseThrow(()-> new ResourceNotFoundException("Invalid Coupon"));
-            if(!coupon.getIsActive())
-              throw new RuntimeException("Coupon is not active");
-            if(coupon.getExpiryDate().isBefore(LocalDateTime.now()))
-                throw new RuntimeException("Coupon is expired");
-            double discountAmount = totalAmount * (coupon.getDiscountPercent() / 100.0);
-            double finalAmount = totalAmount - discountAmount;
-            finalAmount = finalAmount = Math.round(finalAmount * 100.0) / 100.0;
-            totalAmount = finalAmount;
+        if (dto.getCouponCode() != null) {
+            coupon = couponRepo.findByCouponCode(dto.getCouponCode())
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Invalid Coupon"
+                    ));
+            if (!coupon.getIsActive())
+                    throw new RuntimeException(
+                            "Coupon is not active"
+                    );
+            if (coupon.getExpiryDate().isBefore(LocalDate.now()))
+                    throw new RuntimeException(
+                            "Coupon is expired"
+                    );
+                double discountAmount = totalAmount * (coupon.getDiscountPercent() / 100.0);
+                double finalAmount = totalAmount - discountAmount;
+                finalAmount = Math.round(finalAmount * 100.0) / 100.0;
+                totalAmount = finalAmount;
         }
 
-        return ReturnMovieResponseDTO.toDTO(rentals,
-                totalDays,
-                user,
-                totalAmount);
+        return ReturnMovieResponseDTO.toDTO(rentals, totalDays, rentals.get(0).getUser(), totalAmount);
     }
 
 

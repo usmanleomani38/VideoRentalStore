@@ -11,9 +11,29 @@ import java.util.Optional;
 
 public interface RentalRepo extends JpaRepository<Rental, Long> {
 
-    @Query("SELECT r FROM Rental r WHERE r.movie.barcode =:movieId")
-    Optional<Rental> findByMovieId(@Param("movieId")Long movieId);
+
+
+    @Query("SELECT r FROM Rental r WHERE r.movie.barcode = :movieId AND r.user.userId = :userId")
+    List<Rental> findByMovieIdAndUserId(@Param("movieId")
+                                        Long movieId,
+                                        @Param("userId")
+                                        Long userId);
 
     @Query("SELECT r FROM Rental r WHERE r.status = ?1")
     List<Rental> findRentalByStatus(RentalStatus status);
+
+    @Query("SELECT r FROM Rental r WHERE r.movie.barcode = :movieId AND r.user.userId = :userId AND r.status = :status")
+    Optional<Rental> findByMovieIdAndUserIdAndStatus(
+                                                @Param("movieId")
+                                                Long barcode,
+                                                @Param("userId")
+                                                Long userId,
+                                                @Param("status")
+                                                RentalStatus status);
+
+    @Query("SELECT COUNT(r) > 0 FROM Rental r WHERE r.movie.barcode = ?1 AND r.user.userId = ?2 AND r.status = ?3")
+    boolean existsByMovieIdAndUserIdAndStatus(Long barcode,
+                                              Long userId,
+                                              RentalStatus status);
+
 }

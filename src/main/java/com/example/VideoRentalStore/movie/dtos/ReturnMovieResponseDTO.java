@@ -1,6 +1,5 @@
-package com.example.VideoRentalStore.rental.dtos;
+package com.example.VideoRentalStore.movie.dtos;
 
-import com.example.VideoRentalStore.movie.dtos.MovieDTOForResponse;
 import com.example.VideoRentalStore.rental.model.Rental;
 import com.example.VideoRentalStore.user.dtos.UserDTOForResponse;
 import com.example.VideoRentalStore.user.model.User;
@@ -27,9 +26,9 @@ public class ReturnMovieResponseDTO {
                                                Double totalAmount) {
 
         List<MovieDTOForResponse> movieDTOForResponseDTO = new ArrayList<>();
-        for(Rental rental : rentals) {
+        for(Rental rental : rentals)
             movieDTOForResponseDTO.add(MovieDTOForResponse.toDTO(rental, totalDays));
-        }
+
 
         return ReturnMovieResponseDTO.builder()
                 .user(UserDTOForResponse.toDTO(user))

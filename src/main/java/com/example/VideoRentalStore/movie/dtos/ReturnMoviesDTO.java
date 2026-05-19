@@ -13,7 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 public class ReturnMoviesDTO {
 
-    private List<ReturnItemDTO> movies;
+    private List<ReturnItemDTO> rentals;
     private String couponCode;
 
 }

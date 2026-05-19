@@ -14,6 +14,7 @@ import java.time.LocalDate;
 @Builder
 public class RentalDTO {
 
+    private Long rentalId;
     private LocalDate rentalDate;
     private RentalStatus returnStatus;
     private String movieName;
@@ -21,6 +22,7 @@ public class RentalDTO {
 
     public static RentalDTO toDTO(Rental rental, Movie movie) {
         return RentalDTO.builder()
+                .rentalId(rental.getRentalId())
                 .rentalDate(rental.getRentalDate())
                 .returnStatus(rental.getStatus())
                 .movieName(movie.getMovieName())

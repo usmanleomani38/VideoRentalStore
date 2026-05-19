@@ -12,7 +12,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ReturnItemDTO {
 
-      private Long movieId;
+      private Long rentalId;
       private RentalStatus status;
 }
 

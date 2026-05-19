@@ -2,6 +2,7 @@ package com.example.VideoRentalStore.coupon.service;
 
 import com.example.VideoRentalStore.apputils.CommonUtils;
 import com.example.VideoRentalStore.coupon.dtos.CouponDTO;
+import com.example.VideoRentalStore.coupon.dtos.CouponUpdateDTO;
 import com.example.VideoRentalStore.coupon.dtos.CouponsDTO;
 import com.example.VideoRentalStore.coupon.model.Coupon;
 import com.example.VideoRentalStore.coupon.repo.CouponRepo;
@@ -56,12 +57,12 @@ public class CouponService {
     }
 
     @Transactional
-    public CouponDTO updateCouponById(Long couponId, CouponDTO couponDTO) {
+    public CouponUpdateDTO updateCouponById(Long couponId, CouponUpdateDTO couponUpdateDTO) {
 
         Coupon coupon = couponRepo.findById(couponId)
                 .orElseThrow(() -> new ResourceNotFoundException("Coupon not found!"));
 
-        couponRepo.findByCouponCode(couponDTO.getCouponCode())
+        couponRepo.findByCouponCode(couponUpdateDTO.getCouponCode())
                 .ifPresent(c-> {
                     if(!coupon.getCouponId().equals(couponId))
                         throw new IllegalStateException(
@@ -69,12 +70,22 @@ public class CouponService {
                         );
                 });
 
-        coupon.setCouponCode(couponDTO.getCouponCode().toUpperCase());
-        coupon.setDiscountPercent(couponDTO.getDiscountPercent());
-        coupon.setIsActive(couponDTO.getIsActive());
-        coupon.setExpiryDate(couponDTO.getExpiryDate());
-        return CouponDTO.toDTO(couponRepo.save(coupon));
+        if (couponUpdateDTO.getCouponCode() != null) {
+            coupon.setCouponCode(
+                    couponUpdateDTO.getCouponCode().toUpperCase()
+            );
+        }
 
+        if (couponUpdateDTO.getDiscountPercent() != null)
+            coupon.setDiscountPercent(couponUpdateDTO.getDiscountPercent());
+
+        if (couponUpdateDTO.getIsActive() != null)
+            coupon.setIsActive(couponUpdateDTO.getIsActive());
+
+        if (couponUpdateDTO.getExpiryDate() != null)
+            coupon.setExpiryDate(couponUpdateDTO.getExpiryDate());
+
+        return CouponUpdateDTO.toDTO(couponRepo.save(coupon));
     }
 
     public CouponDTO getCouponById(Long couponId) {

@@ -6,10 +6,8 @@ import com.example.VideoRentalStore.exceptionhandler.Status;
 import com.example.VideoRentalStore.movie.dtos.*;
 import com.example.VideoRentalStore.movie.service.MovieService;
 import com.example.VideoRentalStore.rental.dto.response.RentalResponseDTO;
-import com.example.VideoRentalStore.rental.dtos.ReturnMovieResponseDTO;
-import com.example.VideoRentalStore.user.dtos.MovieUpdateDTO;
+import com.example.VideoRentalStore.movie.dtos.ReturnMovieResponseDTO;
 import com.example.VideoRentalStore.user.dtos.OnCreate;
-import com.example.VideoRentalStore.user.dtos.OnUpdate;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -25,8 +23,10 @@ public class MovieController {
     private final MovieService movieService;
 
     @PostMapping("/add-movie")
-    public ResponseEntity<ApiResponse<MovieDTO>> addMovie(@Validated(OnCreate.class)
-                                                              @RequestBody MovieDTO movieDTO) {
+    public ResponseEntity<ApiResponse<MovieDTO>> addMovie(
+                                                        @Validated(OnCreate.class)
+                                                        @RequestBody
+                                                        MovieDTO movieDTO) {
 
         ApiResponse<MovieDTO> response = ApiResponse.<MovieDTO>builder()
                 .status(Status.CREATED)
@@ -37,7 +37,10 @@ public class MovieController {
     }
 
     @GetMapping("/get-movie/{id}")
-    public ResponseEntity<ApiResponse<MovieDTO>> getMovieById(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<MovieDTO>> getMovieById(
+                                                        @PathVariable
+                                                        Long id) {
+
         ApiResponse<MovieDTO> response = ApiResponse.<MovieDTO>builder()
                 .status(Status.OK)
                 .message("Movie fetched successfully")
@@ -47,7 +50,10 @@ public class MovieController {
     }
 
     @DeleteMapping("/delete-movie/{movieId}")
-    public ResponseEntity<ApiResponse<String>> deleteMovieById(@PathVariable Long movieId) {
+    public ResponseEntity<ApiResponse<String>> deleteMovieById(
+                                                        @PathVariable
+                                                        Long movieId) {
+
         ApiResponse<String> response = ApiResponse.<String>builder()
                 .status(Status.OK)
                 .message("Movie deleted successfully")
@@ -57,8 +63,13 @@ public class MovieController {
     }
 
     @PutMapping("/update-movie/{movieId}")
-    public ResponseEntity<ApiResponse<MovieDTO>> updateMovieById(@PathVariable Long movieId,
-                                                                 @Valid @RequestBody MovieDTO movieDTO) {
+    public ResponseEntity<ApiResponse<MovieDTO>> updateMovieById(
+                                                                @PathVariable
+                                                                Long movieId,
+                                                                @Valid
+                                                                @RequestBody
+                                                                MovieDTO movieDTO) {
+
         ApiResponse<MovieDTO> response = ApiResponse.<MovieDTO>builder()
                 .status(Status.OK)
                 .message("Movie updated successfully")
@@ -68,29 +79,43 @@ public class MovieController {
     }
 
     @GetMapping("/get-all-movies")
-    public ResponseEntity<ApiResponse<MoviesDTO>>getAllMovies(
+    public ResponseEntity<ApiResponse<MoviesDTO>> getAllMovies(
             @RequestParam(name = "pageNumber",
-                    defaultValue = AppConstants.PAGE_NUMBER, required = false) Integer pageNumber,
+                    defaultValue = AppConstants.PAGE_NUMBER,
+                    required = false)
+            Integer pageNumber,
             @RequestParam(name = "pageSize",
-                    defaultValue = AppConstants.PAGE_SIZE, required = false) Integer pageSize,
+                    defaultValue = AppConstants.PAGE_SIZE,
+                    required = false)
+            Integer pageSize,
             @RequestParam(name = "sortBy",
                     defaultValue = AppConstants.SORT_MOVIES_BY,
-                    required = false) String sortBy,
+                    required = false)
+            String sortBy,
             @RequestParam(name = "sortOrder",
                     defaultValue = AppConstants.SORT_DIR,
-                    required = false) String sortOrder
+                    required = false)
+            String sortOrder
     ) {
+
+        MoviesDTO moviesDTO = movieService.getAllMovies(sortBy, sortOrder, pageNumber, pageSize);
+        boolean isEmpty = moviesDTO == null || moviesDTO.getMovies().isEmpty();
+        String message = isEmpty
+                ? "No Records found!"
+                : "Movies fetched Successfully";
 
         ApiResponse<MoviesDTO> response = ApiResponse.<MoviesDTO>builder()
                 .status(Status.OK)
-                .message("Movies fetched Successfully")
-                .data(movieService.getAllMovies(sortBy, sortOrder, pageNumber, pageSize))
+                .message(message)
+                .data(moviesDTO)
                 .build();
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/get-movie-by-name")
-    public ResponseEntity<ApiResponse<MovieDTO>>getMovieByName(@RequestParam String movieName) {
+    public ResponseEntity<ApiResponse<MovieDTO>>getMovieByName(
+                                                            @RequestParam
+                                                            String movieName) {
 
         ApiResponse<MovieDTO> response = ApiResponse.<MovieDTO>builder()
                 .status(Status.OK)
@@ -102,7 +127,9 @@ public class MovieController {
 
 
     @GetMapping("/get-movie-by-genre-name")
-    public ResponseEntity<ApiResponse<MoviesDTO>>getMovieByGenreName(@RequestParam String genreName) {
+    public ResponseEntity<ApiResponse<MoviesDTO>>getMovieByGenreName(
+                                                                    @RequestParam
+                                                                    String genreName) {
 
         MoviesDTO moviesDTO = movieService.getMovieByGenreName(genreName);
         boolean isEmpty = moviesDTO == null || moviesDTO.getMovies().isEmpty();
@@ -119,7 +146,9 @@ public class MovieController {
     }
 
     @PostMapping("/checkout")
-    public ResponseEntity<ApiResponse<RentalResponseDTO>> assignMovieToUser(@RequestBody AssignMovieToUserDTO dto) {
+    public ResponseEntity<ApiResponse<RentalResponseDTO>> assignMovieToUser(
+                                                            @RequestBody
+                                                            AssignMovieToUserDTO dto) {
         ApiResponse<RentalResponseDTO> response = ApiResponse.<RentalResponseDTO>builder()
                 .status(Status.CREATED)
                 .message("Checkout successful")
@@ -129,7 +158,10 @@ public class MovieController {
     }
 
     @PostMapping("/return")
-    public ResponseEntity<ApiResponse<ReturnMovieResponseDTO>> processMovie(@RequestBody ReturnMoviesDTO dto) {
+    public ResponseEntity<ApiResponse<ReturnMovieResponseDTO>> processMovie(
+                                                                @RequestBody
+                                                                ReturnMoviesDTO dto) {
+
         ApiResponse<ReturnMovieResponseDTO> response = ApiResponse.<ReturnMovieResponseDTO>builder()
                 .status(Status.OK)
                 .message("Return processed successfully")

@@ -21,7 +21,10 @@ public class GenreController {
     private final GenreService genreService;
 
     @PostMapping("/add-genre")
-    public ResponseEntity<ApiResponse<GenreDTO>> addGenre(@Valid @RequestBody GenreDTO genreDTO) {
+    public ResponseEntity<ApiResponse<GenreDTO>> addGenre(
+                                                    @Valid
+                                                    @RequestBody
+                                                    GenreDTO genreDTO) {
 
         ApiResponse<GenreDTO> response = ApiResponse.<GenreDTO>builder()
                 .status(Status.CREATED)
@@ -33,7 +36,9 @@ public class GenreController {
     }
 
     @GetMapping("/get-genre/{genreId}")
-    public ResponseEntity<ApiResponse<GenreDTO>> getGenreById(@PathVariable Long genreId) {
+    public ResponseEntity<ApiResponse<GenreDTO>> getGenreById(
+                                                    @PathVariable
+                                                    Long genreId) {
 
         ApiResponse<GenreDTO> response = ApiResponse.<GenreDTO>builder()
                 .status(Status.OK)
@@ -44,7 +49,10 @@ public class GenreController {
     }
 
     @DeleteMapping("/delete-genre/{genreId}")
-    public ResponseEntity<ApiResponse<String>> deleteGenreById(@PathVariable Long genreId) {
+    public ResponseEntity<ApiResponse<String>> deleteGenreById(
+                                                @PathVariable
+                                                Long genreId) {
+
         ApiResponse<String> response = ApiResponse.<String>builder()
                 .status(Status.OK)
                 .message("Genre Deleted Successfully")
@@ -54,8 +62,12 @@ public class GenreController {
     }
 
     @PutMapping("/update-genre/{genreId}")
-    public ResponseEntity<ApiResponse<GenreDTO>> updateGenreById(@PathVariable Long genreId,
-                                                                 @Valid @RequestBody GenreDTO genreDTO) {
+    public ResponseEntity<ApiResponse<GenreDTO>> updateGenreById(
+                                                    @PathVariable
+                                                    Long genreId,
+                                                    @Valid
+                                                    @RequestBody GenreDTO genreDTO) {
+
         ApiResponse<GenreDTO> response = ApiResponse.<GenreDTO>builder()
                 .status(Status.OK)
                 .message("Genre Deleted Successfully")
@@ -67,21 +79,33 @@ public class GenreController {
     @GetMapping("/get-all-genre")
     public ResponseEntity<ApiResponse<GenresDTO>>getAllGenres(
             @RequestParam(name = "pageNumber",
-                    defaultValue = AppConstants.PAGE_NUMBER, required = false) Integer pageNumber,
+                    defaultValue = AppConstants.PAGE_NUMBER,
+                    required = false)
+            Integer pageNumber,
             @RequestParam(name = "pageSize",
-                    defaultValue = AppConstants.PAGE_SIZE, required = false) Integer pageSize,
+                    defaultValue = AppConstants.PAGE_SIZE,
+                    required = false)
+            Integer pageSize,
             @RequestParam(name = "sortBy",
                     defaultValue = AppConstants.SORT_GENRES_BY,
-                    required = false) String sortBy,
+                    required = false)
+            String sortBy,
             @RequestParam(name = "sortOrder",
                     defaultValue = AppConstants.SORT_DIR,
-                    required = false) String sortOrder
+                    required = false)
+            String sortOrder
     ) {
+
+        GenresDTO genresDTO = genreService.getAllGenres(pageNumber, pageSize,sortBy, sortOrder);
+        boolean isEmpty = genresDTO == null || genresDTO.getGenres().isEmpty();
+        String message = isEmpty
+                ? "No Records Found!"
+                : "Genres fetched Successfully";
 
         ApiResponse<GenresDTO> response = ApiResponse.<GenresDTO>builder()
                 .status(Status.OK)
-                .message("Genres fetched Successfully")
-                .data(genreService.getAllGenres(pageNumber, pageSize,sortBy, sortOrder))
+                .message(message)
+                .data(genresDTO)
                 .build();
         return ResponseEntity.ok(response);
     }
