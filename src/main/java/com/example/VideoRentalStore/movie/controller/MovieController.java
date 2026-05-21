@@ -9,6 +9,10 @@ import com.example.VideoRentalStore.rental.dto.response.RentalResponseDTO;
 import com.example.VideoRentalStore.movie.dtos.ReturnMovieResponseDTO;
 import com.example.VideoRentalStore.user.dtos.OnCreate;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Digits;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -16,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 @RestController
+@Validated
 @RequestMapping("/api")
 @RequiredArgsConstructor
 public class MovieController {
@@ -54,10 +59,10 @@ public class MovieController {
                                                         @PathVariable
                                                         Long movieId) {
 
+        movieService.deleteMovieById(movieId);
         ApiResponse<String> response = ApiResponse.<String>builder()
                 .status(Status.OK)
                 .message("Movie deleted successfully")
-                .data(movieService.deleteMovieById(movieId))
                 .build();
         return ResponseEntity.ok(response);
     }
@@ -98,7 +103,9 @@ public class MovieController {
             String sortOrder
     ) {
 
-        MoviesDTO moviesDTO = movieService.getAllMovies(sortBy, sortOrder, pageNumber, pageSize);
+        MoviesDTO moviesDTO = movieService.getAllMovies(sortBy, sortOrder,
+                                                                    pageNumber,
+                                                                    pageSize);
         boolean isEmpty = moviesDTO == null || moviesDTO.getMovies().isEmpty();
         String message = isEmpty
                 ? "No Records found!"
@@ -128,8 +135,8 @@ public class MovieController {
 
     @GetMapping("/get-movie-by-genre-name")
     public ResponseEntity<ApiResponse<MoviesDTO>>getMovieByGenreName(
-                                                                    @RequestParam
-                                                                    String genreName) {
+                                                                @RequestParam
+                                                                String genreName) {
 
         MoviesDTO moviesDTO = movieService.getMovieByGenreName(genreName);
         boolean isEmpty = moviesDTO == null || moviesDTO.getMovies().isEmpty();
@@ -149,6 +156,7 @@ public class MovieController {
     public ResponseEntity<ApiResponse<RentalResponseDTO>> assignMovieToUser(
                                                             @RequestBody
                                                             AssignMovieToUserDTO dto) {
+
         ApiResponse<RentalResponseDTO> response = ApiResponse.<RentalResponseDTO>builder()
                 .status(Status.CREATED)
                 .message("Checkout successful")
@@ -169,4 +177,33 @@ public class MovieController {
                 .build();
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/apply-discount")
+    public ResponseEntity<ApiResponse<String>> applyDiscount(
+            @RequestParam
+            @NotNull(message = "Discount is required")
+            @DecimalMin(value = "0.0", message = "Discount cannot be less than 0")
+            @DecimalMax(value = "1.0", message = "Discount cannot be greater than 1")
+            @Digits(integer = 1, fraction = 2, message = "Invalid discount format")
+            Double discount) {
+
+        movieService.applyDiscount(discount);
+        ApiResponse<String> response = ApiResponse.<String>builder()
+                .status(Status.OK)
+                .message("Discount Applied successfully")
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/remove-discount")
+    public ResponseEntity<ApiResponse<String>> removeDiscount() {
+
+        movieService.removeDiscount();
+        ApiResponse<String> response = ApiResponse.<String>builder()
+                .status(Status.OK)
+                .message("Discount Removed successfully")
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
 }

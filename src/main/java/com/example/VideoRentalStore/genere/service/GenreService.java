@@ -31,7 +31,9 @@ public class GenreService {
 
         genreRepo.findByGenreName(genreDTO.getGenreName())
                 .ifPresent(g-> {
-                    throw new RuntimeException("Genre already exists");
+                    throw new RuntimeException(
+                            "Genre already exists"
+                    );
                 });
 
         Genre genre = new Genre();
@@ -40,16 +42,17 @@ public class GenreService {
     }
 
     @Transactional
-    public String deleteByGenreId(Long genreId) {
+    public void deleteByGenreId(Long genreId) {
 
        Genre genre = genreRepo.findById(genreId)
-               .orElseThrow(()-> new ResourceNotFoundException("Genre not found"));
+               .orElseThrow(()-> new ResourceNotFoundException(
+                       "Genre not found"
+               ));
 
         for(Movie movie : genre.getMovieList())
             movie.getGenres().remove(genre);
         genre.getMovieList().clear();
         genreRepo.deleteById(genreId);
-        return "Genre deleted successfully";
     }
 
     public GenreDTO updateGenreById(Long genreId, GenreDTO genreDTO) {
@@ -74,7 +77,9 @@ public class GenreService {
     public GenreDTO getGenreById(Long genreId) {
 
         Genre genre = genreRepo.findById(genreId)
-                .orElseThrow(()-> new ResourceNotFoundException("Genre not found!"));
+                .orElseThrow(()-> new ResourceNotFoundException(
+                        "Genre not found!"
+                ));
         return GenreDTO.toDTO(genre);
 
     }

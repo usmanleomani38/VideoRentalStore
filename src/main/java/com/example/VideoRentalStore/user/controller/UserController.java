@@ -55,10 +55,10 @@ public class UserController {
                                                         @PathVariable
                                                         Long userId) {
 
+        userService.deleteUserByUserId(userId);
         ApiResponse<String> response = ApiResponse.<String>builder()
                 .status(Status.OK)
                 .message("User deleted successfully")
-                .data(userService.deleteUserByUserId(userId))
                 .build();
         return ResponseEntity.ok(response);
     }

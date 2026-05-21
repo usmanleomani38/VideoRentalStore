@@ -53,10 +53,10 @@ public class GenreController {
                                                 @PathVariable
                                                 Long genreId) {
 
+        genreService.deleteByGenreId(genreId);
         ApiResponse<String> response = ApiResponse.<String>builder()
                 .status(Status.OK)
                 .message("Genre Deleted Successfully")
-                .data(genreService.deleteByGenreId(genreId))
                 .build();
         return ResponseEntity.ok(response);
     }

@@ -38,6 +38,8 @@ public class MovieDTO {
     @NotNull(message = "Daily rental rate is required")
     @DecimalMin(value = "0.0", inclusive = false, message = "Daily rental rate must be greater than 0")
     private Double dailyRentalRate;
+    private Double discountedRate;
+    private Double discount;
 
     @NotEmpty(groups = OnCreate.class, message = "At least one genre must be provided")
     private Set<Long> genreIds;   //  for request
@@ -59,6 +61,7 @@ public class MovieDTO {
                 .releaseYear(movie.getReleaseYear())
                 .availableQuantity(movie.getAvailableQuantity())
                 .dailyRentalRate(movie.getDailyRentalRate())
+                .discountedRate(movie.getDiscountedRate())
                 .genreIds(genreSet)
                 .genreNames(genreNames)
                 .build();

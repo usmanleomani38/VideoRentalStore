@@ -24,7 +24,9 @@ public class RentalService {
     private final RentalRepo rentalRepo;
     private final UserRepo userRepo;
 
-    public RentalListDTO getAllRentals(RentalStatus status, String sortBy, String sortOrder) {
+    public RentalListDTO getAllRentals(RentalStatus status,
+                                       String sortBy,
+                                       String sortOrder) {
 
 
 //        if(status==null)
@@ -68,7 +70,6 @@ public class RentalService {
             }
         }
 
-
         List<Rental> finalFilteredList;
 
         if (status == RentalStatus.PENDING)
@@ -85,7 +86,9 @@ public class RentalService {
     public UserRentalListDTO getUserRentals(Long userId, RentalStatus status) {
 
         User user = userRepo.findById(userId)
-                .orElseThrow(()->new ResourceNotFoundException("User not found!"));
+                .orElseThrow(()->new ResourceNotFoundException(
+                        "User not found!"
+                ));
 
         if(status == null) {
             List<Rental> rentals = user.getRentals();
@@ -106,7 +109,5 @@ public class RentalService {
 //            return UserRentalListDTO.toDTO(user, userRepo.findByUserIdAndStatus(userId, status));
 
     }
-
-
 
 }

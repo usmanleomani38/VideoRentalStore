@@ -51,17 +51,20 @@ public class CouponController {
                                                     @PathVariable
                                                     Long couponId) {
 
+        couponService.deleteCouponById(couponId);
         ApiResponse<String> response = ApiResponse.<String>builder()
                 .status(Status.OK)
                 .message("Coupon deleted successfully")
-                .data(couponService.deleteCouponById(couponId))
                 .build();
         return ResponseEntity.ok(response);
     }
 
     @PutMapping("/update-coupon/{couponId}")
-    public ResponseEntity<ApiResponse<CouponUpdateDTO>> updateCouponById(@PathVariable Long couponId,
-                                                                         @RequestBody CouponUpdateDTO couponUpdateDTO) {
+    public ResponseEntity<ApiResponse<CouponUpdateDTO>> updateCouponById(
+            @PathVariable
+            Long couponId,
+            @RequestBody
+            CouponUpdateDTO couponUpdateDTO) {
 
         ApiResponse<CouponUpdateDTO> response = ApiResponse.<CouponUpdateDTO>builder()
                 .status(Status.OK)
@@ -94,7 +97,11 @@ public class CouponController {
             String sortOrder
     ) {
 
-        CouponsDTO couponsDTO = couponService.getAllCoupons(pageNumber, pageSize, isActive, sortBy, sortOrder);
+        CouponsDTO couponsDTO = couponService.getAllCoupons(pageNumber,
+                                                                        pageSize,
+                                                                        isActive,
+                                                                        sortBy,
+                                                                        sortOrder);
         boolean isEmpty = couponsDTO == null || couponsDTO.getCoupons().isEmpty();
         String message = isEmpty
                 ? "No Records Found!"

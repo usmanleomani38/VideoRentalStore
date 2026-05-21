@@ -46,21 +46,22 @@ public class CouponService {
     }
 
 
-    public String deleteCouponById(Long couponId) {
+    public void deleteCouponById(Long couponId) {
 
         if (!couponRepo.existsById(couponId))
             throw new ResourceNotFoundException(
                     "Coupon not exists!"
             );
         couponRepo.deleteById(couponId);
-        return "Coupon Deleted!";
     }
 
     @Transactional
     public CouponUpdateDTO updateCouponById(Long couponId, CouponUpdateDTO couponUpdateDTO) {
 
         Coupon coupon = couponRepo.findById(couponId)
-                .orElseThrow(() -> new ResourceNotFoundException("Coupon not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Coupon not found!"
+                ));
 
         couponRepo.findByCouponCode(couponUpdateDTO.getCouponCode())
                 .ifPresent(c-> {

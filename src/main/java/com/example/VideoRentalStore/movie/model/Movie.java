@@ -30,6 +30,7 @@ public class Movie extends AuditFields {
     private Integer releaseYear;
     private Integer availableQuantity;
     private Double dailyRentalRate;
+    private Double discountedRate;
 
     @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Rental> rentals = new ArrayList<>();

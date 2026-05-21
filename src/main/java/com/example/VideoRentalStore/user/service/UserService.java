@@ -27,7 +27,9 @@ public class UserService {
 
             userRepo.findByEmail(userDTO.getEmail())
                     .ifPresent(u -> {
-                        throw new IllegalStateException("This email is already Registered!");
+                        throw new IllegalStateException(
+                                "This email is already Registered!"
+                        );
                     });
 
             User newUser = new User();
@@ -44,26 +46,30 @@ public class UserService {
 //            throw new IllegalArgumentException("Phone number contains only digits");
 
         User user = userRepo.findByContactNo(phoneNo)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "User not found!"
+                ));
+
         return UserDTO.toDTO(user);
     }
 
     @Transactional
-    public String deleteUserByUserId(Long userId) {
+    public void deleteUserByUserId(Long userId) {
 
          User user = userRepo.findById(userId)
                  .orElseThrow(() -> new ResourceNotFoundException("User not found!"));
          if(!user.getRentals().isEmpty())
              throw new RuntimeException("User has rentals cannot delete!");
          userRepo.delete(user);
-         return "User deleted successfully";
     }
 
     @Transactional
     public UserDTO updateUserByUserId(Long userId, UserDTO userDTO) {
 
         User user = userRepo.findById(userId)
-                .orElseThrow(()-> new ResourceNotFoundException("User not found!"));
+                .orElseThrow(()-> new ResourceNotFoundException(
+                        "User not found!"
+                ));
 
         userRepo.findByEmail(userDTO.getEmail())
                 .ifPresent(u -> {
@@ -99,11 +105,16 @@ public class UserService {
     public UserListDTO getUserByName(String userName) {
 
         if (!userName.matches("^[a-zA-Z ]*$"))
-            throw new IllegalArgumentException("User Name contains only alphabets");
+            throw new IllegalArgumentException(
+                    "User Name contains only alphabets"
+            );
 
         List<User> users = userRepo.findByUserNameStartsWithIgnoreCase(userName);
         if(users.isEmpty())
-            throw new ResourceNotFoundException("Users not found!");
+            throw new ResourceNotFoundException(
+                    "Users not found!"
+            );
+
         return UserListDTO.toDTO(users);
     }
 
