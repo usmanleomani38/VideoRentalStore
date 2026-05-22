@@ -269,7 +269,7 @@ public class MovieService {
             return MoviesDTO.builder()
                     .movies(Collections.emptyList())
                     .build();
-        return MoviesDTO.toDTO(new ArrayList<>(movies), pageNumber,pageSize, totalPages, totalElements);
+        return MoviesDTO.toDTO(movies, pageNumber,pageSize, totalPages, totalElements);
     }
 
     public MovieDTO getMovieByName(String movieName) {

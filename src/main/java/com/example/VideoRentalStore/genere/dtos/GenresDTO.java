@@ -21,7 +21,11 @@ public class GenresDTO {
     private int totalPages;
 
 
-    public static GenresDTO toDTO(List<Genre> genreList, Integer pageNumber, Integer pageSize, int totalPages, Long totalElements) {
+    public static GenresDTO toDTO(List<Genre> genreList,
+                                  Integer pageNumber,
+                                  Integer pageSize,
+                                  int totalPages,
+                                  Long totalElements) {
 
         List<GenreDTO> genreDTOS = new ArrayList<>();
 

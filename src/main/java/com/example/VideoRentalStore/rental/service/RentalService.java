@@ -2,6 +2,7 @@ package com.example.VideoRentalStore.rental.service;
 
 import com.example.VideoRentalStore.apputils.CommonUtils;
 import com.example.VideoRentalStore.exceptionhandler.customexceptions.ResourceNotFoundException;
+import com.example.VideoRentalStore.rental.dto.response.RentalDTO;
 import com.example.VideoRentalStore.rental.dtos.RentalListDTO;
 import com.example.VideoRentalStore.rental.dtos.UserRentalListDTO;
 import com.example.VideoRentalStore.rental.model.Rental;
@@ -11,6 +12,8 @@ import com.example.VideoRentalStore.user.dtos.UserDTOForResponse;
 import com.example.VideoRentalStore.user.model.User;
 import com.example.VideoRentalStore.user.repo.UserRepo;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -24,10 +27,86 @@ public class RentalService {
     private final RentalRepo rentalRepo;
     private final UserRepo userRepo;
 
-    public RentalListDTO getAllRentals(RentalStatus status,
+    public RentalListDTO getAllRentals(Integer pageNumber,
+                                       Integer pageSize,
+                                       RentalStatus status,
                                        String sortBy,
-                                       String sortOrder) {
+                                       String sortOrder,
+                                       Long rentalId,
+                                       Long userId) {
 
+
+        PageRequest pageRequest = PageRequest.of(
+                pageNumber,
+                pageSize,
+                CommonUtils.buildSort(
+                        sortBy,
+                        sortOrder));
+
+        if (userId != null && status != null) {
+            User user = userRepo.findById(userId)
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "User not found"
+                    ));
+
+            Page<Rental> page = rentalRepo.findByUserIdAndStatus(userId, status, pageRequest);
+            var rentals = page.getContent();
+
+            if (rentals.isEmpty())
+                return RentalListDTO.builder()
+                        .userRentals(UserRentalListDTO.builder()
+                                .user(UserDTOForResponse.toDTO(user))
+                                .rentals(List.of())
+                                .build())
+                        .totalElements(0L)
+                        .build();
+
+            return RentalListDTO.toDTO(
+                    user,
+                    rentals,
+                    pageNumber,
+                    pageSize,
+                    page.getTotalElements(),
+                    page.getTotalPages());
+        }
+
+
+        if (userId != null) {
+            User user = userRepo.findById(userId)
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "User not found"
+                    ));
+
+            Page<Rental> page = rentalRepo.findByUserId(userId, pageRequest);
+
+            var rentals = page.getContent();
+
+            if (rentals.isEmpty())
+                return RentalListDTO.builder()
+                        .userRentals(UserRentalListDTO.builder()
+                                .user(UserDTOForResponse.toDTO(user))
+                                .rentals(List.of())
+                                .build())
+                        .totalElements(0L)
+                        .build();
+
+            return RentalListDTO.toDTO(
+                    user,
+                    user.getRentals(),
+                    pageNumber,
+                    pageSize,
+                    page.getTotalElements(),
+                    page.getTotalPages());
+        }
+
+        if (rentalId != null) {
+            Rental rental = rentalRepo.findById(rentalId)
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Rental not found!"
+                    ));
+
+            return RentalListDTO.toDTO(rental);
+        }
 
 //        if(status==null)
 //            return GetAllRentalsDTO.toDTO(rentalRepo.findAll());
@@ -39,49 +118,39 @@ public class RentalService {
 //            return GetAllRentalsDTO.toDTO(rentalRepo.findRentalByStatus(RentalStatus.RETURNED));
 
 
-        List<Rental> rentals = rentalRepo.findAll(CommonUtils.buildSort(sortBy, sortOrder));
-        List<Rental> pendingRentals = new ArrayList<>();
-        List<Rental> lossRentals = new ArrayList<>();
-        List<Rental> returnedRentals = new ArrayList<>();
-        if(rentals.isEmpty())
-            return RentalListDTO.builder()
+        if (status == null) {
+            Page<Rental> page = rentalRepo.findAll(pageRequest);
+            var rentals = page.getContent();
+
+            if (rentals.isEmpty())
+                return RentalListDTO.builder()
+                        .rentals(Collections.emptyList())
+                        .build();
+
+            return RentalListDTO.toDTO(rentals,
+                    pageNumber,
+                    pageSize,
+                    page.getTotalElements(),
+                    page.getTotalPages());
+
+
+        }
+        else {
+
+            Page<Rental> page = rentalRepo.findRentalByStatus(status, pageRequest);
+            if (page.getContent().isEmpty())
+                return RentalListDTO.builder()
                     .rentals(Collections.emptyList())
                     .build();
 
-        if(status == null)
-            return RentalListDTO.toDTO(new ArrayList<>(rentals));
-
-        if(status.equals(RentalStatus.PENDING))  {
-            for(Rental rental : rentals) {
-                if(rental.getStatus().equals(RentalStatus.PENDING))
-                    pendingRentals.add(rental);
-            }
+            return RentalListDTO.toDTO(page.getContent(),
+                    pageNumber,
+                    pageSize,
+                    page.getTotalElements(),
+                    page.getTotalPages());
         }
-        if(status.equals(RentalStatus.RETURNED))  {
-            for(Rental rental : rentals) {
-                if(rental.getStatus().equals(RentalStatus.RETURNED))
-                    returnedRentals.add(rental);
-            }
-        }
-        else {
-            for(Rental rental : rentals) {
-                if(rental.getStatus().equals(RentalStatus.LOSS))
-                    lossRentals.add(rental);
-            }
-        }
-
-        List<Rental> finalFilteredList;
-
-        if (status == RentalStatus.PENDING)
-            finalFilteredList = pendingRentals;
-         else if (status == RentalStatus.LOSS)
-            finalFilteredList = lossRentals;
-         else
-            finalFilteredList = returnedRentals;
-
-        return RentalListDTO.toDTO(finalFilteredList);
-
     }
+
 
     public UserRentalListDTO getUserRentals(Long userId, RentalStatus status) {
 
@@ -100,7 +169,9 @@ public class RentalService {
             return UserRentalListDTO.toDTO(user, rentals);
         }
         else
-            return UserRentalListDTO.toDTO(user, userRepo.findByUserIdAndStatus(userId, status));
+            return UserRentalListDTO.toDTO(user, userRepo.findByUserIdAndStatus(
+                                                                            userId,
+                                                                            status));
 //        if(status.equals(RentalStatus.RETURNED))
 //            return UserRentalListDTO.toDTO(user, userRepo.findByUserIdAndStatus(userId, status));
 //        else if (status.equals(RentalStatus.LOSS))

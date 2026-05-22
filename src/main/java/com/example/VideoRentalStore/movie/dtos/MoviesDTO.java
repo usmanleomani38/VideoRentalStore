@@ -36,6 +36,8 @@ public class MoviesDTO {
                 .totalPages(totalPages)
                 .build();
     }
+
+
     public static MoviesDTO toDTO(List<Movie> movies) {
 
         List<MovieDTO> movieDTOS = new ArrayList<>();

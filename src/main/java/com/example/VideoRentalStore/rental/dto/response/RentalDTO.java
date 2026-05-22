@@ -29,4 +29,15 @@ public class RentalDTO {
                 .dailyRentalRate(movie.getDailyRentalRate())
                 .build();
     }
+
+    public static RentalDTO toDTO(Rental rental) {
+
+        return RentalDTO.builder()
+                .rentalId(rental.getRentalId())
+                .rentalDate(rental.getRentalDate())
+                .returnStatus(rental.getStatus())
+                .movieName(rental.getMovie().getMovieName())
+                .dailyRentalRate(rental.getMovie().getDailyRentalRate())
+                .build();
+    }
 }

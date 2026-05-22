@@ -48,6 +48,17 @@ public class MovieDTO {
 
     public static MovieDTO toDTO(Movie movie) {
 
+
+        double discount = 0;
+        if (movie.getDiscountedRate() != null &&
+                movie.getDailyRentalRate() != null &&
+                movie.getDailyRentalRate() > 0) {
+
+            discount =
+                    ((movie.getDailyRentalRate() - movie.getDiscountedRate())
+                            / movie.getDailyRentalRate()) * 100;
+        }
+
         List<String> genreNames = new ArrayList<>();
         Set<Long> genreSet = new HashSet<>();
         for(Genre genre : movie.getGenres()) {
@@ -62,6 +73,7 @@ public class MovieDTO {
                 .availableQuantity(movie.getAvailableQuantity())
                 .dailyRentalRate(movie.getDailyRentalRate())
                 .discountedRate(movie.getDiscountedRate())
+                .discount(discount)
                 .genreIds(genreSet)
                 .genreNames(genreNames)
                 .build();

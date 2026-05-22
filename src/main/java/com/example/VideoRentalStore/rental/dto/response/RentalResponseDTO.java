@@ -20,7 +20,7 @@ public class RentalResponseDTO {
     private UserDTOForResponse user;
     private List<RentalDTO> rentals;
 
-    public static RentalResponseDTO toDTO(User user, List<Rental> rentals ) {
+    public static RentalResponseDTO toDTO(User user, List<Rental> rentals) {
 
         List<RentalDTO> rentalDTOS = new ArrayList<>();
         for(Rental rental : rentals)

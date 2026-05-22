@@ -20,8 +20,14 @@ public class RentalController {
 
     @GetMapping("/get-rentals")
     public ResponseEntity<ApiResponse<RentalListDTO>> getAllRentals(
-            @RequestParam(required = false)
-            RentalStatus status,
+            @RequestParam(name = "pageNumber",
+                    defaultValue = AppConstants.PAGE_NUMBER,
+                    required = false)
+            Integer pageNumber,
+            @RequestParam(name = "pageSize",
+                    defaultValue = AppConstants.PAGE_SIZE,
+                    required = false)
+            Integer pageSize,
             @RequestParam(name = "sortBy",
                     defaultValue = AppConstants.SORT_RENTALS_BY,
                     required = false)
@@ -29,14 +35,48 @@ public class RentalController {
             @RequestParam(name = "sortOrder",
                     defaultValue = AppConstants.SORT_DIR,
                     required = false)
-            String sortOrder
-    ) {
+            String sortOrder,
+            @RequestParam(
+                    required = false)
+            Long rentalId,
+            @RequestParam(
+                    required = false)
+            Long userId,
+            @RequestParam(required = false)
+            RentalStatus status) {
 
-        RentalListDTO rentalListDTO = rentalService.getAllRentals(status, sortBy, sortOrder);
-        boolean isEmpty = rentalListDTO == null || rentalListDTO.getRentals().isEmpty();
+        if (rentalId != null && userId != null)
+            throw new IllegalArgumentException(
+                    "Cannot filter by both rentalId and userId simultaneously"
+            );
+
+        if (rentalId != null && status != null)
+            throw new IllegalArgumentException(
+                    "Cannot filter by both rentalId and status simultaneously"
+            );
+
+        RentalListDTO rentalListDTO = rentalService.getAllRentals(pageNumber,
+                                                                     pageSize,
+                                                                     status,
+                                                                     sortBy,
+                                                                     sortOrder,
+                                                                     rentalId,
+                                                                     userId);
+            boolean isEmpty;
+
+            if (rentalListDTO.getRental() != null)
+                isEmpty = false;
+             else if (rentalListDTO.getUserRentals() != null)
+                isEmpty = rentalListDTO.getUserRentals().getRentals() == null
+                        || rentalListDTO.getUserRentals().getRentals().isEmpty();
+             else
+                isEmpty = rentalListDTO.getRentals() == null
+                        || rentalListDTO.getRentals().isEmpty();
+
         String message = isEmpty
                 ?  "No Records Found!"
                 : "Rentals fetched Successfully";
+
         ApiResponse<RentalListDTO> response = ApiResponse.<RentalListDTO>builder()
                 .status(Status.OK)
                 .message(message)
