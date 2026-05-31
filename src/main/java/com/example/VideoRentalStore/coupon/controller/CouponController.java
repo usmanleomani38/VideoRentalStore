@@ -2,6 +2,7 @@ package com.example.VideoRentalStore.coupon.controller;
 
 import com.example.VideoRentalStore.apputils.AppConstants;
 import com.example.VideoRentalStore.coupon.dtos.CouponDTO;
+import com.example.VideoRentalStore.coupon.dtos.CouponDashboardResponseDTO;
 import com.example.VideoRentalStore.coupon.dtos.CouponUpdateDTO;
 import com.example.VideoRentalStore.coupon.dtos.CouponsDTO;
 import com.example.VideoRentalStore.coupon.service.CouponService;
@@ -11,6 +12,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
@@ -111,6 +114,18 @@ public class CouponController {
                 .status(Status.OK)
                 .message(message)
                 .data(couponsDTO)
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+
+    @GetMapping("/get-coupons-count")
+    public ResponseEntity<ApiResponse<CouponDashboardResponseDTO>>getCouponsCount() {
+
+        ApiResponse<CouponDashboardResponseDTO> response = ApiResponse.<CouponDashboardResponseDTO>builder()
+                .status(Status.SUCCESS)
+                .message("Records fetched Successfully")
+                .data(couponService.getCouponsCount())
                 .build();
         return ResponseEntity.ok(response);
     }

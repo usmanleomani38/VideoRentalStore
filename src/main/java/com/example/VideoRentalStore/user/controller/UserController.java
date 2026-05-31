@@ -15,6 +15,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")
@@ -117,7 +119,7 @@ public class UserController {
         public ResponseEntity<ApiResponse<UserListDTO>>getUserByName(
                                                             @RequestParam
                                                             String userName) {
-            float f = Float.parseFloat("3.124");
+
             ApiResponse<UserListDTO> response = ApiResponse.<UserListDTO>builder()
                     .status(Status.OK)
                     .message("User fetched Successfully")
@@ -126,4 +128,14 @@ public class UserController {
             return ResponseEntity.ok(response);
         }
 
+    @GetMapping("/get-users-count")
+    public ResponseEntity<ApiResponse<Map<String, Object>>>getUsersCount() {
+
+        ApiResponse<Map<String, Object>> response = ApiResponse.<Map<String, Object>>builder()
+                .status(Status.SUCCESS)
+                .message("Records fetched Successfully")
+                .data(userService.getUsersCount())
+                .build();
+        return ResponseEntity.ok(response);
+    }
 }

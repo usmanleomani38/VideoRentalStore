@@ -206,4 +206,16 @@ public class MovieController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/get-movies-count")
+    public ResponseEntity<ApiResponse<MoviesDashboard>> getMoviesCount() {
+
+        ApiResponse<MoviesDashboard> response = ApiResponse.<MoviesDashboard>builder()
+                .status(Status.SUCCESS)
+                .message("Records fetched successful")
+                .data(movieService.getMoviesCount())
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+
 }

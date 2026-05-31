@@ -2,7 +2,7 @@ package com.example.VideoRentalStore.rental.service;
 
 import com.example.VideoRentalStore.apputils.CommonUtils;
 import com.example.VideoRentalStore.exceptionhandler.customexceptions.ResourceNotFoundException;
-import com.example.VideoRentalStore.rental.dto.response.RentalDTO;
+import com.example.VideoRentalStore.rental.dtos.RentalDashboardResponse;
 import com.example.VideoRentalStore.rental.dtos.RentalListDTO;
 import com.example.VideoRentalStore.rental.dtos.UserRentalListDTO;
 import com.example.VideoRentalStore.rental.model.Rental;
@@ -16,7 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 
@@ -26,6 +26,7 @@ public class RentalService {
 
     private final RentalRepo rentalRepo;
     private final UserRepo userRepo;
+
 
     public RentalListDTO getAllRentals(Integer pageNumber,
                                        Integer pageSize,
@@ -152,33 +153,30 @@ public class RentalService {
     }
 
 
-    public UserRentalListDTO getUserRentals(Long userId, RentalStatus status) {
+    public Double getTotalRevenue(String movieName,
+                                        LocalDate startDate,
+                                        LocalDate endDate,
+                                        RentalStatus status) {
 
-        User user = userRepo.findById(userId)
-                .orElseThrow(()->new ResourceNotFoundException(
-                        "User not found!"
-                ));
+        Double totalRevenue = rentalRepo.getTotalAmountWithFilters(
+                movieName, status, startDate, endDate);
 
-        if(status == null) {
-            List<Rental> rentals = user.getRentals();
-            if (rentals.isEmpty())
-                return UserRentalListDTO.builder()
-                        .rentals(Collections.emptyList())
-                        .user(UserDTOForResponse.toDTO(user))
-                        .build();
-            return UserRentalListDTO.toDTO(user, rentals);
-        }
-        else
-            return UserRentalListDTO.toDTO(user, userRepo.findByUserIdAndStatus(
-                                                                            userId,
-                                                                            status));
-//        if(status.equals(RentalStatus.RETURNED))
-//            return UserRentalListDTO.toDTO(user, userRepo.findByUserIdAndStatus(userId, status));
-//        else if (status.equals(RentalStatus.LOSS))
-//            return UserRentalListDTO.toDTO(user, userRepo.findByUserIdAndStatus(userId, status));
-//        else
-//            return UserRentalListDTO.toDTO(user, userRepo.findByUserIdAndStatus(userId, status));
+        return totalRevenue != null
+                                ? totalRevenue
+                                : Double.valueOf(0);
 
     }
+
+
+    public RentalDashboardResponse getRentalsCount() {
+
+         return RentalDashboardResponse.builder()
+                 .totalRentals(rentalRepo.count())
+                 .pendingCount(rentalRepo.findRentalsCountByStatus(RentalStatus.PENDING))
+                 .returnedCount(rentalRepo.findRentalsCountByStatus(RentalStatus.RETURNED))
+                 .lossCount(rentalRepo.findRentalsCountByStatus(RentalStatus.LOSS))
+                 .build();
+    }
+
 
 }

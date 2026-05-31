@@ -3,13 +3,17 @@ package com.example.VideoRentalStore.rental.controller;
 import com.example.VideoRentalStore.apputils.AppConstants;
 import com.example.VideoRentalStore.exceptionhandler.ApiResponse;
 import com.example.VideoRentalStore.exceptionhandler.Status;
+import com.example.VideoRentalStore.movie.dtos.MovieDTO;
+import com.example.VideoRentalStore.rental.dtos.RentalDashboardResponse;
 import com.example.VideoRentalStore.rental.dtos.RentalListDTO;
-import com.example.VideoRentalStore.rental.dtos.UserRentalListDTO;
 import com.example.VideoRentalStore.rental.model.RentalStatus;
 import com.example.VideoRentalStore.rental.service.RentalService;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api")
@@ -85,17 +89,42 @@ public class RentalController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/rentals/user/{userId}")
-    public ResponseEntity<ApiResponse<UserRentalListDTO>> getAllUserRentals(
-            @PathVariable Long userId,
-            @RequestParam(required = false) RentalStatus status) {
 
-        ApiResponse<UserRentalListDTO> response = ApiResponse.<UserRentalListDTO>builder()
+    @PostMapping("/show-revenue")
+    public ResponseEntity<ApiResponse<Double>>getTotalRevenue(
+            @RequestParam(
+                    required = false)
+            String movieName,
+            @RequestParam(
+                    required = false)
+            LocalDate startDate,
+            @RequestParam(
+                    required = false)
+            LocalDate endDate,
+            @RequestParam(
+                    required = false)
+            RentalStatus status
+
+    ) {
+
+        ApiResponse<Double> response = ApiResponse.<Double>builder()
                 .status(Status.OK)
-                .message("Rental fetched Successfully")
-                .data(rentalService.getUserRentals(userId, status))
+                .message("Record fetched Successfully")
+                .data(rentalService.getTotalRevenue(movieName, startDate, endDate, status))
                 .build();
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/get-total-rentals")
+    public ResponseEntity<ApiResponse<RentalDashboardResponse>>getRentalsCount() {
+
+        ApiResponse<RentalDashboardResponse> response = ApiResponse.<RentalDashboardResponse>builder()
+                .status(Status.SUCCESS)
+                .message("Record fetched Successfully")
+                .data(rentalService.getRentalsCount())
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
 
 }

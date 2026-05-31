@@ -15,5 +15,12 @@ public interface CouponRepo extends JpaRepository<Coupon, Long> {
     Optional<Coupon> findByCouponCode(@Param("couponCode")String couponCode);
 
 
+    @Query("SELECT COUNT(c) FROM Coupon c WHERE c.isActive = :status")
+    Long countByStatus(Boolean status);
 
+    @Query("SELECT COUNT(c) FROM Coupon c WHERE c.expiryDate <= CURRENT_DATE")
+    Long countByExpirationTime();
+
+    @Query("SELECT COUNT(c) FROM Coupon c WHERE c.expiryDate > CURRENT_DATE")
+    Long countValid();
 }

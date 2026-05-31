@@ -18,7 +18,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -123,6 +125,27 @@ public class GenreService {
 
     }
 
+    public Map<String, Object> getGenresCount() {
+
+//        Map<String, Object> data = new HashMap<>();
+//        data.put("totalGenres", genreRepo.count());
+
+//        return new HashMap<String, Object>() {{
+//            put("totalGenres", genreRepo.count());
+//        }};
+
+//        return Map.ofEntries(Map.entry("totalGenres", genreRepo.count()));
+
+//        return Collections.singletonMap("totalGenres", genreRepo.count());
+
+//        return MapBuilder
+//                .of("totalGenres", genreRepo.count())
+//                .build();
+
+//        return ImmutableMap.of("totalGenres", genreRepo.count());
+
+        return Map.of("totalGenres", genreRepo.count());
+    }
 }
 
 

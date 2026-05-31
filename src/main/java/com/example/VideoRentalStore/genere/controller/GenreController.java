@@ -8,10 +8,13 @@ import com.example.VideoRentalStore.genere.dtos.GenreWithMoviesListDTO;
 import com.example.VideoRentalStore.genere.dtos.GenresDTO;
 import com.example.VideoRentalStore.genere.service.GenreService;
 import com.example.VideoRentalStore.genere.dtos.MoviesCountDTO;
+import com.example.VideoRentalStore.movie.dtos.MoviesDashboard;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
@@ -128,6 +131,17 @@ public class GenreController {
                 .status(Status.OK)
                 .message("Records fetched Successfully")
                 .data(genreService.getMoviesPerGenre())
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/get-genres-count")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> getGenresCount() {
+
+        ApiResponse<Map<String ,Object>> response = ApiResponse.<Map<String, Object>>builder()
+                .status(Status.SUCCESS)
+                .message("Records fetched successful")
+                .data(genreService.getGenresCount())
                 .build();
         return ResponseEntity.ok(response);
     }

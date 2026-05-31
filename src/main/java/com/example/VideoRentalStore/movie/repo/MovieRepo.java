@@ -32,6 +32,9 @@ public interface MovieRepo extends JpaRepository<Movie, Long> {
     @Transactional
     @Query("UPDATE Movie m SET m.discountedRate = NULL")
     void removeDiscount();
+
+    @Query("SELECT SUM(m.availableQuantity) FROM Movie m")
+    Long getTotalAvailableStock();
 }
 
 

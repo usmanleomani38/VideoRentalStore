@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -118,4 +119,8 @@ public class UserService {
         return UserListDTO.toDTO(users);
     }
 
+    public Map<String, Object> getUsersCount() {
+
+        return Map.of("totalUsers" ,userRepo.count());
+    }
 }

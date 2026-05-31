@@ -18,6 +18,7 @@ public class RentalDTO {
     private LocalDate rentalDate;
     private RentalStatus returnStatus;
     private String movieName;
+    private String userName;
     private Double dailyRentalRate;
 
     public static RentalDTO toDTO(Rental rental, Movie movie) {
@@ -26,6 +27,7 @@ public class RentalDTO {
                 .rentalDate(rental.getRentalDate())
                 .returnStatus(rental.getStatus())
                 .movieName(movie.getMovieName())
+                .userName(rental.getUser().getUserName())
                 .dailyRentalRate(movie.getDailyRentalRate())
                 .build();
     }

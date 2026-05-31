@@ -2,6 +2,7 @@ package com.example.VideoRentalStore.coupon.service;
 
 import com.example.VideoRentalStore.apputils.CommonUtils;
 import com.example.VideoRentalStore.coupon.dtos.CouponDTO;
+import com.example.VideoRentalStore.coupon.dtos.CouponDashboardResponseDTO;
 import com.example.VideoRentalStore.coupon.dtos.CouponUpdateDTO;
 import com.example.VideoRentalStore.coupon.dtos.CouponsDTO;
 import com.example.VideoRentalStore.coupon.model.Coupon;
@@ -134,5 +135,17 @@ public class CouponService {
        return !activeCoupons.isEmpty()
          ? CouponsDTO.toDTO(activeCoupons, pageNumber,pageSize, totalPages, totalElements) :
          CouponsDTO.toDTO(deActiveCoupons, pageNumber,pageSize, totalPages, totalElements);
+    }
+
+    public CouponDashboardResponseDTO getCouponsCount() {
+
+        return CouponDashboardResponseDTO.builder()
+                .totalCoupons(couponRepo.count())
+                .totalActiveCoupons(couponRepo.countByStatus(true))
+                .totalDeActiveCoupons(couponRepo.countByStatus(false))
+                .totalExpiredCoupons(couponRepo.countByExpirationTime())
+                .totalNonExpiredCoupons(couponRepo.countValid())
+                .build();
+
     }
 }
